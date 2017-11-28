@@ -2,9 +2,13 @@
 /data/
 /reports/
 
+# downloaded java file
+access2csv.jar
+
 # History files
 .Rhistory
 .Rapp.history
+nohistory
 
 # Session Data files
 .RData

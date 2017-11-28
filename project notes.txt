@@ -1,0 +1,18 @@
+notes on shower clearing draw analysis
+2017-11-27
+
+Start with Cal_Events.accdb, since I have it.
+Turn it into csv files 
+./access2csv.sh '/home/jiml/HotWaterResearch/projects/CECHWT24/hot water calcs/draw patterns/Aquacraft/Cal_Events.accdb'
+
+Trying RODBC first. had to 
+  $ sudo apt-get install unixodbc unixodbc-dev
+first.
+Had to chmod +777 a directory to get the installation to work
+Can't find an open-source driver for .accdb files.
+
+Downloaded access2csv.jar from https://github.com/AccelerationNet/access2csv/releases
+
+Used access2csv.jar directly. 
+
+

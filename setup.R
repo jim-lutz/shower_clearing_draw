@@ -3,6 +3,7 @@
 # Jim Lutz  "Tue Sep 12 15:46:11 2017"
 
 # clean up leftovers before starting
+# this is to prevent unintentionally using old data
 l_obj=ls(all=TRUE)
 l_obj = c(l_obj, "l_obj") # be sure to include l_obj
 rm(list = l_obj)
@@ -52,4 +53,9 @@ library(plyr)
 
 # change the default background for ggplot2 to white, not gray
 theme_set( theme_bw() )
+
+# work with RODBC
+if(!require(RODBC)){install.packages("RODBC")}
+library(RODBC)
+
 

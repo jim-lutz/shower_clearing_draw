@@ -1,8 +1,7 @@
-# get_uuid_data.R
-# script to collect all the uuid information in
-# /home/jiml/HotWaterResearch/projects/HWDS monitoring/retrieve_field_data/data/by_sensorID
-# makes one long data.table of uuid, time, value by houseID
-# Jim Lutz "Sat Nov 25 13:06:14 2017"
+# get_accdb_data.R
+# script get the access database tables from 
+# '/home/jiml/HotWaterResearch/projects/CECHWT24/hot water calcs/draw patterns/Aquacraft/Cal_Events.accdb'
+# Jim Lutz "Mon Nov 27 17:11:02 2017"
 
 # set packages & etc
 source("setup.R")
@@ -10,11 +9,32 @@ source("setup.R")
 # set up paths to working directories
 source("setup_wd.R")
 
-# call useful functions
-source("functions.R")
+# filename of Cal_Events.accdb database 
+db <- '/home/jiml/HotWaterResearch/projects/CECHWT24/hot water calcs/draw patterns/Aquacraft/Cal_Events.accdb'
 
-# path to mote files
-wd_mote_data = "/home/jiml/HotWaterResearch/projects/HWDS monitoring/retrieve_field_data/data/by_sensorID/"
+# call access2csv.jar on the Cal_Events.accdb database 
+system("cd ./data; java -jar ../access2csv.jar '/home/jiml/HotWaterResearch/projects/CECHWT24/hot water calcs/draw patterns/Aquacraft/Cal_Events.accdb'")
+
+# get the schema
+system("cd ./data; java -jar ../access2csv.jar '/home/jiml/HotWaterResearch/projects/CECHWT24/hot water calcs/draw patterns/Aquacraft/Cal_Events.accdb' --schema > schema.txt")
+
+# read the AllCalEvents_2011.csv file
+fn_events <- paste0(wd_data, "AllCalEvents_2011.csv")
+cols_events <- c("Keycode", "SumAs", "CountAs", "StartTime", "Duration",
+                 "Peak", "Volume", "Mode", "ModeFreq")
+DT_events <- data.table(read_csv(file = fn_events, col_names = cols_events))
+str(DT_events)
+tables()
+
+# change StartTime to POSIXct
+# put on hold for now. have to change timezone to offset from UTC?
+# DT_events[,starttime:=parse_datetime(StartTime,format="abdHMSzY")]
+
+# save the data table
+fn_DT_events <- paste0(wd_data,"DT_events.RData")
+save(DT_events, file = fn_DT_events)
+
+
 
 # load the DT_field_data_uuid data.table
 load(file = paste0(wd_data,"DT_field_data_uuid.RData"))
