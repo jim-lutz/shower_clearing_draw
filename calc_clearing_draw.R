@@ -71,18 +71,69 @@ length(unique(DT_shower_events$Keycode))
   # [1] 711
 # No showers identified at 19 sites? Oh well
 
+summary(DT_shower_events$Volume)
+  # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  # 0.11   10.14   15.33   18.02   22.96  108.51 
+
 # look at the distribution of shower volumes 
-p <- ggplot(data = DT_heavy )
-p <- p + geom_line(aes(x=Hr, y=GPH), color="blue", size=2)
-p <- p + geom_line(aes(x=Hr,y=ER), color="red")
-p <- p + geom_line(aes(x=Hr,y=HPWH), color="green")
-p <- p + ggtitle("Hot Water and Electricity Use (Mon, 5/18, 6 people)") + labs(x = "hour", y = "Hourly Use")
-p <- p + scale_x_continuous(breaks=1:24,labels=1:24)
-p
+p <- ggplot(data = DT_shower_events )
+p <- p + geom_histogram(aes(x=Volume), binwidth=1)
+p <- p + ggtitle("Shower Volume") + labs(x = "Volume (gallons)", y = "count")
+p 
 
-ggsave(filename = paste0(wd_charts,"/HW_elec_heavy.png"), plot = p)
-
-
+ggsave(filename = paste0(wd_charts,"/shower_volumes1.png"), plot = p)
 
 # Look at ratio of peak/mode for all the shower events
+DT_shower_events[,peak_mode:= Peak/Mode]
+
+# exam results
+summary(DT_shower_events$peak_mode)
+  # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  # 1.000   1.020   1.143   1.768   1.766 640.000 
+
+# what's the outliers?
+DT_shower_events[peak_mode>20,][order(-peak_mode)]
+# these are showers with a mode of <= 0.05 GPM?
+
+# get rid of those
+DT_shower_events <- DT_shower_events[Mode>0.05]
+
+# now see what's there
+summary(DT_shower_events$peak_mode)
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 1.000   1.020   1.143   1.554   1.762  75.642 
+DT_shower_events[peak_mode>15,][order(-peak_mode)]
+
+# get rid of the 2 remaining really strange ones 
+DT_shower_events <- DT_shower_events[peak_mode<20]
+
+summary(DT_shower_events$peak_mode)
+  # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  # 1.000   1.020   1.143   1.548   1.762  18.556 
+
+DT_shower_events[peak_mode>10,][order(-peak_mode)]
+DT_shower_events[peak_mode==1,][order(-peak_mode)]
+# how many have peak as the mode
+nrow(DT_shower_events[peak_mode==1,])/nrow(DT_shower_events)
+  # [1] 0.1224252
+
+# look at the distribution of peak_mode
+p <- ggplot(data = DT_shower_events[peak_mode>1] )
+p <- p + geom_histogram(aes(x=peak_mode), binwidth = .05)
+p <- p + ggtitle("Shower Peak/Mode (cleaned data)") + labs(x = "ratio (GPM/GPM)", y = "count")
+p 
+
+ggsave(filename = paste0(wd_charts,"/peak_mode.png"), plot = p)
+
+
+
+# look at the distribution of remaining shower volumes to make sure it's still OK
+p <- ggplot(data = DT_shower_events[peak_mode>1] )
+p <- p + geom_histogram(aes(x=Volume), binwidth = 1)
+p <- p + ggtitle("Shower Volume (cleaned data)") + labs(x = "Volume (gallons)", y = "count")
+p 
+
+ggsave(filename = paste0(wd_charts,"/shower_volumes2.png"), plot = p)
+
+
 

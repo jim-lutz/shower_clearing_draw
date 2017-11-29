@@ -1,6 +1,7 @@
 # directories
 /data/
 /reports/
+/charts/
 
 # downloaded java file
 access2csv.jar
