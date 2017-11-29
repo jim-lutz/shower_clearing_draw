@@ -135,5 +135,46 @@ p
 
 ggsave(filename = paste0(wd_charts,"/shower_volumes2.png"), plot = p)
 
+# compare the duration at Mode (ModeFreq*10?) to total Duration
+DT_shower_events[peak_mode>1, shower_duration:= ModeFreq * 10]
+DT_shower_events[peak_mode>1, duration_ratio := shower_duration/Duration]
 
+summary(DT_shower_events$duration_ratio)
+   #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   # 0.0750  0.2692  0.3659  0.3943  0.4935  0.9792    2104 
+
+# look at the distribution of duration_ratio to see if it makes sense
+p <- ggplot(data = DT_shower_events[peak_mode>1] )
+p <- p + geom_histogram(aes(x=duration_ratio))
+p <- p + ggtitle("Shower duration ratio") + labs(x = "shower time (s) / total duration (s)", y = "count")
+p 
+
+# look at the shower duration
+summary(DT_shower_events$shower_duration)
+   # Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   # 20.0   110.0   170.0   212.1   270.0  1940.0    2104 
+
+# look at the distribution of duration_ratio to see if it makes sense
+p <- ggplot(data = DT_shower_events[peak_mode>1] )
+p <- p + geom_histogram(aes(x=shower_duration/60), binwidth = .5)
+p <- p + ggtitle("Shower duration") + labs(x = "shower time (m)", y = "count")
+p 
+
+# the mode selection may be too picky. 
+# find the resolution of mode
+head(DT_shower_events[,list(nMode=length(Keycode)),by=Mode][order(Mode)], n=100)
+
+# look at the distribution of Mode flow rates
+summary(DT_shower_events$Mode)
+  #  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  # 0.090   1.580   1.910   2.087   2.340   9.770 
+p <- ggplot(data = DT_shower_events[] )
+p <- p + geom_histogram(aes(x=Mode), binwidth = .25)
+p <- p + ggtitle("Mode") + labs(x = "flow rate (GPM)", y = "count")
+p 
+
+
+
+# calc the clearing draw and actual shower volumes
+DT_shower_events[peak_mode>1,clearing:= Peak * (Volume - Mode*Duration )/(Peak-Mode)]
 
