@@ -1,0 +1,7 @@
+flowchart of files in shower clearing draw analysis
+
+get_accdb_data.R
+  # script get the access database tables from
+  calls:    access2csv.jar
+  input:    Cal_Events.accdb
+  output:   DT_events.RData

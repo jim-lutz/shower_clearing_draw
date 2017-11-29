@@ -25,6 +25,17 @@ sessionInfo()
   # Platform: x86_64-pc-linux-gnu (64-bit)
   # Running under: Ubuntu 16.04.3 LTS
 
+# work with plyr 
+if(!require(plyr)){install.packages("plyr")}
+library(plyr)
+
+# work with data.tables
+#https://github.com/Rdatatable/data.table/wiki
+#https://www.datacamp.com/courses/data-analysis-the-data-table-way
+if(!require(data.table)){install.packages("data.table")}
+library(data.table)
+
+
 # work with tidyverse
 # http://tidyverse.org/
 # needed libxml2-dev installed
@@ -36,16 +47,6 @@ library(tidyverse)
 # library(stringr)
 # part of tidyverse
 
-# work with data.tables
-#https://github.com/Rdatatable/data.table/wiki
-#https://www.datacamp.com/courses/data-analysis-the-data-table-way
-if(!require(data.table)){install.packages("data.table")}
-library(data.table)
-
-# work with plyr 
-if(!require(plyr)){install.packages("plyr")}
-library(plyr)
-
 # work with ggplot2
 # if(!require(ggplot2)){install.packages("ggplot2")}
 # library(ggplot2)
@@ -54,8 +55,5 @@ library(plyr)
 # change the default background for ggplot2 to white, not gray
 theme_set( theme_bw() )
 
-# work with RODBC
-if(!require(RODBC)){install.packages("RODBC")}
-library(RODBC)
 
 

@@ -24,6 +24,17 @@ cols_events <- c("Keycode", "SumAs", "CountAs", "StartTime", "Duration",
                  "Peak", "Volume", "Mode", "ModeFreq")
 DT_events <- data.table(read_csv(file = fn_events, col_names = cols_events))
 str(DT_events)
+  # Classes ‘data.table’ and 'data.frame':	2168698 obs. of  9 variables:
+  # $ Keycode  : int  18192 18192 18192 18192 18192 18192 18192 18192 18192 18192 ...
+  # $ SumAs    : chr  "Leak" "Leak" "Leak" "Leak" ...
+  # $ CountAs  : chr  "Leak" "Leak" "Leak" "Leak" ...
+  # $ StartTime: chr  "Mon Jul 02 15:03:27 PDT 2007" "Mon Jul 02 15:09:37 PDT 2007" "Mon Jul 02 15:11:37 PDT 2007" "Mon Jul 02 15:31:07 PDT 2007" ...
+  # $ Duration : int  360 110 1160 150 520 10 160 190 60 280 ...
+  # $ Peak     : num  0.21 0.16 0.26 0.13 0.21 0.16 0.16 0.16 0.07 0.16 ...
+  # $ Volume   : num  0.52 0.16 1.72 0.17 0.74 0.03 0.22 0.33 0.06 0.42 ...
+  # $ Mode     : num  0.07 0.05 0.1 0.06 0.08 0.16 0.09 0.1 0.07 0.1 ...
+  # $ ModeFreq : int  9 6 28 10 17 1 6 11 3 8 ...
+  # - attr(*, ".internal.selfref")=<externalptr> 
 tables()
 
 # change StartTime to POSIXct
@@ -34,43 +45,3 @@ tables()
 fn_DT_events <- paste0(wd_data,"DT_events.RData")
 save(DT_events, file = fn_DT_events)
 
-
-
-# load the DT_field_data_uuid data.table
-load(file = paste0(wd_data,"DT_field_data_uuid.RData"))
-
-# see what we got
-tables()
-# NAME                NROW NCOL MB COLS                                  KEY
-# [1,] DT_field_data_uuid 2,278    5  1 uuid,houseID,moteID,sensortype,source    
-# Total: 1MB
-DT_field_data_uuid
-
-# count of motes by houseID
-DT_field_data_uuid[,list(nmotes=length(unique(moteID))),by=houseID][order(houseID)]
-
-# get the moteIDs and uuids for a houseID
-DT_field_data_uuid[houseID==3,]
-# 106 uuids
-sort(unique(DT_field_data_uuid[houseID==3,]$moteID))
-  #  [1] "x323f" "x3288" "x32f3" "x32ff" "x331f" "x332c" "x3352" "x3356" "x339e" "x33ed"
-  # [11] "x3443" "x3497" "x34c5" "x358e" "x35b1" "x35b4"
-
-# build lists of filenames by houseID
-DT_field_data_uuid[,mote_fn := paste0(wd_mote_data,"RSmap.",moteID,".raw.xz.RData")]
-
-# confirm that uuid filenames aren't in moteID filenames.
-DT_field_data_uuid[uuid=="5f6b1e82-6227-5b6c-b191-db2b69b428c7",]
-
-# get the moteID and uuid filenames by houseID
-fn_motes <- Sys.glob(paste0(wd_mote_data,"RSmap.x*.RData"))
-
-
-
-# get data from all the moteIDs
-DT_uuids_data <- get_DT_uuids_data(fn_motes)
-# Error: cannot allocate vector of size 1.3 Gb
-# Error in system(paste(which, shQuote(names[i])), intern = TRUE, ignore.stderr = TRUE) : 
-#   cannot popen '/usr/bin/which 'svn' 2>/dev/null', probable reason 'Cannot allocate memory'
-
-# Well that's not going to work!
