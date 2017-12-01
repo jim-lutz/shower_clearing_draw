@@ -5,3 +5,16 @@ get_accdb_data.R
   calls:    access2csv.jar
   input:    Cal_Events.accdb
   output:   DT_events.RData
+  
+calc_clearing_draw.R
+  # script calculate the clearing draw for showers
+  input:  DT_events.RData
+
+After looking at the charts of from this and thinking about it a bit
+realised that can't use Aquacraft's event records. The mode is just
+the flow rate that shows up in the most intervals in the event. If flow
+rate during the shower varies a little bit, mode won't show the whole 
+duration of the shower. 
+
+Went back to recover the Aquacraft Seattle and EBMUD conservation studies 
+where I do have the flow databases.

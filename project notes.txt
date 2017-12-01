@@ -18,6 +18,105 @@ Used access2csv.jar directly.
 2017-11-29
 start flowchart file for this analysis
 
+The resolution on flow rates probably means that Mode in the Aquacraft datasets is missing many of the intervals that are part of the actual shower.
+
+See if I still have a copy of the raw data from REUWS I to analyze.
 
 
+found copies of .mdb files from Aquacraft Seattle and EBMUD hot water studies
+used mdb-tools to get into them
+see: Liberating data from Microsoft Access “.mdb” files
+        http://mazamascience.com/WorkingWithData/?p=168
+    mdb-tables -1 'Seattle end use data.mdb' 
+    mdb-schema 'Seattle end use data.mdb'
+the .mdb files are results of queries on the raw data
+Tables named 'LOGGING DATA *' are the events databases from the raw data.
+
+In the .tdb files there's a table 'Flows'
+
+CREATE TABLE [Flows]
+ (
+	[ID]			Long Integer, 
+	[EventID]			Long Integer NOT NULL, 
+	[StartTime]			DateTime NOT NULL, 
+	[Rate]			Single NOT NULL
+);
+
+mdb-export '13197tst.tdb' 'Flows'
+
+ID,EventID,StartTime,Rate
+1,1,"10/25/99 12:58:59",1.00000001e-01
+2,2,"10/25/99 12:59:49",5.00000007e-02
+3,2,"10/25/99 12:59:59",1.00000001e-01
+4,2,"10/25/99 13:00:09",1.59999996e-01
+5,2,"10/25/99 13:00:19",9.99999978e-03
+6,2,"10/25/99 13:00:29",9.99999978e-03
+7,2,"10/25/99 13:00:39",9.99999978e-03
+8,2,"10/25/99 13:00:49",9.99999978e-03
+9,3,"10/25/99 13:02:49",2.09999993e-01
+
+And a table 'Events'
+
+CREATE TABLE [Events]
+ (
+	[ID]			Long Integer, 
+	[StartTime]			DateTime NOT NULL, 
+	[EndTime]			DateTime NOT NULL, 
+	[Duration]			Long Integer NOT NULL, 
+	[Class]			Integer NOT NULL, 
+	[Peak]			Single NOT NULL, 
+	[Volume]			Single NOT NULL, 
+	[Mode]			Single NOT NULL, 
+	[ModeFreq]			Long Integer NOT NULL
+);
+
+$ mdb-export '13197tst.tdb' 'Events' | head
+ID,StartTime,EndTime,Duration,Class,Peak,Volume,Mode,ModeFreq
+1,"10/25/99 12:58:59","10/25/99 12:59:09",10,2,1.00000001e-01,1.99999996e-02,1.00000001e-01,1
+2,"10/25/99 12:59:49","10/25/99 13:00:59",70,2,1.59999996e-01,5.99999987e-02,9.99999978e-03,4
+3,"10/25/99 13:02:49","10/25/99 13:02:59",10,2,2.09999993e-01,3.99999991e-02,2.09999993e-01,1
+4,"10/25/99 13:02:59","10/25/99 13:03:39",40,3,1.87000000e+00,5.69999993e-01,1.87000000e+00,1
+5,"10/25/99 13:03:39","10/25/99 13:03:49",10,2,2.09999993e-01,3.99999991e-02,2.09999993e-01,1
+6,"10/25/99 13:03:49","10/25/99 13:04:59",70,3,4.61999989e+00,3.72000003e+00,4.61999989e+00,2
+7,"10/25/99 13:27:19","10/25/99 13:28:29",70,3,1.71000004e+00,1.58000004e+00,1.71000004e+00,5
+8,"10/25/99 13:28:29","10/25/99 13:30:49",140,2,9.99999978e-03,1.99999996e-02,9.99999978e-03,14
+9,"10/25/99 13:30:49","10/25/99 13:32:09",80,3,8.92000008e+00,8.52000046e+00,8.92000008e+00,3
+
+Class is probably type. Can probably decode from the 'LOGGING DATA *' tables in the ../.mdb files
+
+$ mdb-export 'db1.mdb' 'LOGGING DATA 2' | head -n 5
+KEYCODE,USETYPE,DATE,START,DURATION,END,PEAK,VOLUME,MODE,MODE NO
+13191,"LEAK","03/24/00 00:00:00","03/24/00 01:46:21",20,"03/24/00 01:46:41",1.00000001e-01,2.99999993e-02,1.00000001e-01,"1"
+13191,"LEAK","03/24/00 00:00:00","03/24/00 02:04:31",80,"03/24/00 02:05:51",9.99999978e-03,9.99999978e-03,9.99999978e-03,"8"
+13191,"LEAK","03/24/00 00:00:00","03/24/00 02:27:21",90,"03/24/00 02:28:51",5.00000007e-02,1.99999996e-02,9.99999978e-03,"8"
+13191,"LEAK","03/24/00 00:00:00","03/24/00 03:11:01",10,"03/24/00 03:11:11",1.00000001e-01,1.99999996e-02,1.00000001e-01,"1"
+
+Figure out what Class corresponds to SHOWER, then extract just those from the *.tdb files.
+Plot a bunch shower events, see if it's possible to come up with an expanded mode. mode +/- 0.2 GPM maybe?
+
+2017-12-01
+
+Using mdbviewer to manually scan data, seems like same KEYCODE is used in pre
+
+from /home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/AQSE/0.original.data/db1.mdb
+table = LOGGING DATA 1 
+    KEYCODE =13191
+    USETYPE = SHOWER
+    START   = 11/05/1999 02:17:32
+is no file 13191*.tdb    ?
+
+In file 
+/home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/AQSE/0.original.data/Pre Retrofit/13197hwtst.tdb
+table = Flows
+    ID, EventID, StartTime, Rate
+table = Events    
+    ID, StartTime, EndTime, Duration, Class, Peak, Volume, Mode, ModeFreq
+    ID in Events table corresponds to EventID in Flows table.
+    
+Will have to open up 
+/home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/AQSE/0.original.data/Seattle end use data.mdb
+MDB file viewer doesn't let me see enough records to find one to correlate USETYPE to Class.   
+
+Simplify and prune the Aquacraft data folders.    
+    
 
