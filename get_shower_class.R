@@ -97,3 +97,34 @@ DT_EBMUD_LOG1[USETYPE=='SHOWER',list(n.SHOWER=length(USETYPE)),by=KEYCODE][order
 # look at dates in 22070
 DT_EBMUD_LOG1[KEYCODE=='22070' & USETYPE=='SHOWER'][order(START)]
 
+# look for these ones
+# 21:   22070  SHOWER 04/28/01 12:52:15      640 2.50  19.23 1.78      23
+# 22:   22070  SHOWER 04/28/01 14:03:15     1220 1.90  34.97 1.69      45
+# 23:   22070  SHOWER 04/29/01 11:38:05      850 1.85  24.89 1.76      30
+# 24:   22070  SHOWER 04/29/01 13:34:15      840 5.29  24.31 1.55      70
+# 25:   22070  SHOWER 04/30/01 06:06:45      670 5.09  22.67 1.78      20
+# 26:   22070  SHOWER 04/30/01 06:32:35     1350 3.20  39.14 1.72      45
+# 27:   22070  SHOWER 04/30/01 18:14:45      570 1.90  16.53 1.77      16
+
+
+# hand export of table Flows from /data/Aquacraft/EBMUD/Pre Retrofit/22070B.tdb
+X22070B_Flows
+DT_X22070B_Flows <- data.table(X22070B_Flows)
+str(DT_X22070B_Flows)
+DT_X22070B_Flows[str_detect(StartTime, "04/29/") & str_detect(StartTime, " 11:38")]
+  #      ID EventID              StartTime Rate
+  # 1: 4357     467 04/29/2001 11:38:05 AM 1.85
+  # 2: 4358     467 04/29/2001 11:38:15 AM 1.85
+  # 3: 4359     467 04/29/2001 11:38:25 AM 1.85
+  # 4: 4360     467 04/29/2001 11:38:35 AM 1.85
+  # 5: 4361     467 04/29/2001 11:38:45 AM 1.85
+  # 6: 4362     467 04/29/2001 11:38:55 AM 1.85
+DT_X22070B_Flows[EventID==467]
+# that's shower line 23: above
+
+# doesn't appear class has a unique correspondence to SHOWER.
+# it's probably some temporary variable in Aquacraft's analysis. 
+
+
+
+

@@ -119,4 +119,26 @@ MDB file viewer doesn't let me see enough records to find one to correlate USETY
 
 Simplify and prune the Aquacraft data folders.    
     
+Spent a lot of time wrasseling with getting a database into a data.table
+to find that class wasn't a key for USETYPE.
+
+Go back and make a function to export at table to a temporary *.csv file,
+read.csv into a data.table and delete the temporary file.
+
+Then search for showers in 'LOGGING DATA {1|2|3} {|Hot Water}' tables in 
+EBMUD Retrofit Database.mdb.
+
+Then search for those times in 'Events' tables in 
+./{Pre Retrofit|Post Retrofit 1|Post Retrofit 2}/"KEYCODE"*.tdb 
+Then pull out the interval data from the 'Flows' tables in the same *.tdb
+
+Maybe it would be better to read in all the shower data from the tables and save to
+*.RData tables, like for curate_field_data project, then work from the .RData files
+
+Calibrate times between hot water and total water by end of showers?
+
+
+
+
+
 
