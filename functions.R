@@ -49,7 +49,7 @@ get_table <- function(fn_database, db_table) {
   db_table    <- paste0("'",db_table,"'")
   
   # the build the args list for mdb-export 
-  mdb_args <- c(fn_database, db_table)
+  mdb_args <- c('-D "%F %T"',fn_database, db_table)
   
   # call mdb-export, output to table.csv
   system2("mdb-export", args = mdb_args, stdout = "table.csv")
