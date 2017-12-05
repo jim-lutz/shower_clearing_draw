@@ -142,5 +142,12 @@ Calibrate times between hot water and total water by end of showers?
 develop a function to read a data table from access database
 
 
+2017-12-05
+
+use get_table function to get shower data out of 
+/home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb
+
+then count number of overlapping events for each shower
+
 
 
