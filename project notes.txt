@@ -137,7 +137,9 @@ Maybe it would be better to read in all the shower data from the tables and save
 
 Calibrate times between hot water and total water by end of showers?
 
+2017-12-04
 
+develop a function to read a data table from access database
 
 
 
