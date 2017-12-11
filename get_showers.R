@@ -79,9 +79,9 @@ coincident.events <- function(DT, this_eventID) {
   DT2 <- DT1[eventID != this_eventID,]
   
   DT3 <- DT2[END > START[this_eventID]]
-             
+  DT3[,list(eventID,USETYPE,START,END)]
+  
   DT4 <- DT3[START < END[this_eventID]]             
-             
   DT4[,list(eventID,USETYPE,START,END)]
 
   
