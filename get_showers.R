@@ -40,9 +40,6 @@ DT_table[,DATE:=str_sub(DATE,1,10)]
 # list of shower eventIDs (775)
 l_showerID <- DT_table[USETYPE=='SHOWER',eventID]
 
-shower_start <- DT_table[eventID %in% l_showerID,START]
-shower_end   <- DT_table_test[eventID %in% l_showerID]$END
-
 # test showerID
 this_showerID <- l_showerID[4]
 
@@ -65,27 +62,28 @@ n.events <- nrow(DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_sh
 DT <- DT_table
 this_eventID <- l_showerID[4]
 
-coincident.events <- function(DT, this_eventID) {
+coincident.events <- function(this_eventID, DT) {
   # function to return the number of events coincident to one event in a logging table
   # DT is a data.table of LOGGING DATA table from Aquacraft
   #   with an added eventID data field
   # eventID is the number of the event for which coincidenet events are being counted
-  # returns the number of coincident events
+  # returns a data.table of eventID and number of coincident events
   
-  DT[eventID == this_eventID, list(eventID,USETYPE,START,END)]
+  event_start <- DT[eventID == this_eventID, START]
+  event_end   <- DT[eventID == this_eventID, END]
   
-  DT1 <- DT[KEYCODE == KEYCODE[this_eventID]]
+  DT[, coincident := FALSE] # initialize everything FALSE
   
-  DT2 <- DT1[eventID != this_eventID,]
+  # find just the coincident events
+  DT[KEYCODE == KEYCODE[this_eventID] & END > event_start & START < event_end, coincident := TRUE]             
   
-  DT3 <- DT2[END > START[this_eventID]]
-  DT3[,list(eventID,USETYPE,START,END)]
+  n.coincident <- nrow(DT[coincident==TRUE]) - 1 # don't count self event
   
-  DT4 <- DT3[START < END[this_eventID]]             
-  DT4[,list(eventID,USETYPE,START,END)]
+  DT_ncoincid <- data.table(eventID = this_eventID, ncoincid = n.coincident)
+  
+  return(DT_ncoincid)
 
-  
-  
-    
 }
 
+
+DF <- coincident.events(l_showerID[4], DT_table)
