@@ -37,33 +37,6 @@ DT_table[,eventID:=.I]
 # drop time from date
 DT_table[,DATE:=str_sub(DATE,1,10)]
 
-# look at KEYCODEs (houses)
-DT_table[,list(count=length(unique(DATE))),by=KEYCODE][order(-count)]
-# 33 KEYCODEs of ~ 2 weeks @, except ~ 4 weeks 22009, 22070, 22021
-
-# look at USETYPEs
-DT_table[,list(count=length((DATE))),by=USETYPE][order(-count)]
-  #            USETYPE count
-  #  1:           LEAK 75761
-  #  2:         FAUCET 21633
-  #  3:         TOILET  5438
-  #  4:  CLOTHESWASHER  1431
-  #  5:         SHOWER   775
-  #  6:     DISHWASHER   541
-  #  7: CLOTHESWASHER@   404
-  #  8:        TOILET@   353
-  #  9:        OUTDOOR   236
-  # 10:           BATH   150
-  # 11:    DISHWASHER@   145
-  # 12:     IRRIGATION    51
-  # 13:        UNKNOWN    31
-  # 14:         Toilet     4
-  # 15:         HOTTUB     1
-
-# look at SHOWERs
-DT_table[USETYPE=='SHOWER',list(nshower=length(USETYPE)),by=KEYCODE][order(-nshower)]
-# looks plausible
-
 # list of shower eventIDs (775)
 l_showerID <- DT_table[USETYPE=='SHOWER',eventID]
 
@@ -88,3 +61,31 @@ DT_table[this_showerID]
 
 n.events <- nrow(DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & END > START[this_showerID] & START < END[this_showerID],])
   # [1] 2
+
+DT <- DT_table
+this_eventID <- l_showerID[4]
+
+coincident.events <- function(DT, this_eventID) {
+  # function to return the number of events coincident to one event in a logging table
+  # DT is a data.table of LOGGING DATA table from Aquacraft
+  #   with an added eventID data field
+  # eventID is the number of the event for which coincidenet events are being counted
+  # returns the number of coincident events
+  
+  DT[eventID == this_eventID, list(eventID,USETYPE,START,END)]
+  
+  DT1 <- DT[KEYCODE == KEYCODE[this_eventID]]
+  
+  DT2 <- DT1[eventID != this_eventID,]
+  
+  DT3 <- DT2[END > START[this_eventID]]
+             
+  DT4 <- DT3[START < END[this_eventID]]             
+             
+  DT4[,list(eventID,USETYPE,START,END)]
+
+  
+  
+    
+}
+
