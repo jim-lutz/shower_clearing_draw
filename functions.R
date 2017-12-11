@@ -64,4 +64,29 @@ get_table <- function(fn_database, db_table) {
 }
 
 
+coincident.events <- function(this_eventID) {
+  # function to return the number of events coincident to one event in a logging table
+  # eventID is the number of the event for which coincidenet events are being counted
+  # operates on global DT_table 
+  # DT_table is a data.table of LOGGING DATA table from Aquacraft
+  #   with an added eventID data field
+  # DT_table is kept global to avoid copying it
+  # returns a data.table of eventID and number of coincident events
+  
+  event_start <- DT_table[eventID == this_eventID, START]
+  event_end   <- DT_table[eventID == this_eventID, END]
+  
+  DT_table[, coincident := FALSE] # initialize everything FALSE
+  
+  # find just the coincident events
+  DT_table[KEYCODE == KEYCODE[this_eventID] & END > event_start & START < event_end, coincident := TRUE]             
+  
+  n.coincident <- nrow(DT_table[coincident==TRUE]) - 1 # don't count self event
+  
+  DT_ncoincid <- data.table(eventID = this_eventID, ncoincid = n.coincident)
+  
+  return(DT_ncoincid)
+  
+}
+
 

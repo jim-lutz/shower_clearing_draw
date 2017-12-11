@@ -41,49 +41,33 @@ DT_table[,DATE:=str_sub(DATE,1,10)]
 l_showerID <- DT_table[USETYPE=='SHOWER',eventID]
 
 # test showerID
-this_showerID <- l_showerID[4]
-
-# number of events that coincide with a shower
-DT_table[KEYCODE == KEYCODE[this_showerID]] 
-  # 4168
-DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID,]
-  # 4167
-DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & END > START[this_showerID],]
-  # 3438
-DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & START < END[this_showerID],]
-  # 731
-DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & END > START[this_showerID] & START < END[this_showerID],]
-  # 2 faucets
-DT_table[this_showerID]
-
-n.events <- nrow(DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & END > START[this_showerID] & START < END[this_showerID],])
-  # [1] 2
-
-DT <- DT_table
 this_eventID <- l_showerID[4]
 
-coincident.events <- function(this_eventID, DT) {
-  # function to return the number of events coincident to one event in a logging table
-  # DT is a data.table of LOGGING DATA table from Aquacraft
-  #   with an added eventID data field
-  # eventID is the number of the event for which coincidenet events are being counted
-  # returns a data.table of eventID and number of coincident events
-  
-  event_start <- DT[eventID == this_eventID, START]
-  event_end   <- DT[eventID == this_eventID, END]
-  
-  DT[, coincident := FALSE] # initialize everything FALSE
-  
-  # find just the coincident events
-  DT[KEYCODE == KEYCODE[this_eventID] & END > event_start & START < event_end, coincident := TRUE]             
-  
-  n.coincident <- nrow(DT[coincident==TRUE]) - 1 # don't count self event
-  
-  DT_ncoincid <- data.table(eventID = this_eventID, ncoincid = n.coincident)
-  
-  return(DT_ncoincid)
+DF <- coincident.events(l_showerID[4])
 
-}
+# call coincident.events on every shower event
+DT_coincid_showers <- data.table(ldply(.data=l_showerID,
+                                       .fun =coincident.events, 
+                                       .progress= "text", 
+                                       .inform=TRUE))
 
+# look at frequency of coincident draws with showers
+qplot(DT_coincid_showers$ncoincid)
+summary(DT_coincid_showers$ncoincid)
+# -1? 1102?
+DT_coincid_showers[ncoincid==-1,]
+  #    eventID ncoincid
+  # 1:   66257       -1
+  # 2:  101068       -1
+DT_table[eventID == 66257]
+  # END = 1899-12-30 15:13:46
+DT_table[eventID == 101068]
+  # END = 1899-12-30 14:23:37
 
-DF <- coincident.events(l_showerID[4], DT_table)
+DT_coincid_showers[ncoincid==1102,]
+  #    eventID ncoincid
+  # 1:   67305     1102
+DT_table[eventID == 67305]
+  # START = 1899-12-30 16:05:06
+
+# looks like there's a date formatting problem somewhere.
