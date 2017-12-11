@@ -1,6 +1,7 @@
 # get_showers.R
-# script to get shower data from all the 'LOGGING DATA '{1|2|3}{|Hot Water} tables in
-# ./data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb
+# script to get shower data from all the 'LOGGING DATA '{1|2|3}{|Hot Water} tables 
+# in ./data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb and
+# ./data/Aquacraft/Seattle/Seattle end use data.mdb
 # Jim Lutz "Tue Dec  5 06:17:35 2017"
 
 # set packages & etc
@@ -12,11 +13,17 @@ source("setup_wd.R")
 # get some useful functions
 source("functions.R")
 
+# build the file names to the database
+fn_EBMUD_db <- paste0(wd_data,"Aquacraft/EBMUD/EBMUD Retrofit Database.mdb")
+fn_Seattle_db <- paste0(wd_data,"Aquacraft/Seattle/Seattle end use data.mdb")
+
+# list of tables to get from the databases
+l_tables <- paste0("LOGGING DATA ", c('1','2','3'))
+l_tables <- c(l_tables, paste0(l_tables,' Hot Water'))
+
 # open 'LOGGING DATA 1' from EBMUD Retrofit Database.mdb
-# build the file name to the database
-fn_database <- paste0(wd_data,"Aquacraft/EBMUD/EBMUD Retrofit Database.mdb")
-# the table to get from the database
-db_table <- "LOGGING DATA 1"
+fn_database <- fn_EBMUD_db
+db_table <- l_tables[1]
 
 # get the table
 DT_table <- get_table(fn_database, db_table)
@@ -29,7 +36,6 @@ DT_table[,eventID:=.I]
 
 # drop time from date
 DT_table[,DATE:=str_sub(DATE,1,10)]
-
 
 # look at KEYCODEs (houses)
 DT_table[,list(count=length(unique(DATE))),by=KEYCODE][order(-count)]
@@ -58,45 +64,29 @@ DT_table[,list(count=length((DATE))),by=USETYPE][order(-count)]
 DT_table[USETYPE=='SHOWER',list(nshower=length(USETYPE)),by=KEYCODE][order(-nshower)]
 # looks plausible
 
-# count number concurrent events during showers
-# try one house for now
-DT_table[KEYCODE=='22070' & USETYPE=='SHOWER']
-DT_table[KEYCODE=='22070' & USETYPE=='SHOWER',list(nshower=length(USETYPE)),by=DATE]
+# list of shower eventIDs (775)
+l_showerID <- DT_table[USETYPE=='SHOWER',eventID]
 
-DT_table[KEYCODE=='22070' & USETYPE=='SHOWER' & DATE=='2001-05-04']
-
-# try one house and one day for now
-DT_table_test <- DT_table[KEYCODE=='22070' & DATE=='2001-05-04']
-
-DT_table_test[]
-# 268 events that day
-DT_table_test[USETYPE=='SHOWER']
-
-# pull out start and end of a shower
-shower_start <- DT_table_test[eventID=='81720']$START
-  # [1] "2001-05-04 06:33:55"
-shower_end   <- DT_table_test[eventID=='81720']$END
-  # [1] "2001-05-04 06:53:15"
-# ~ 20 minute shower
-
-DT_table_test[eventID != '81720' & END > shower_start]
-# 247 events ended after the shower started
-
-DT_table_test[eventID != '81720' & START < shower_end]
-# 20 events started before the shower ended
-
-DT_table_test[eventID != '81720' & END > shower_start & START < shower_end]
-# but no events overlapped that shower
-
-n_overlap <- nrow(DT_table_test[eventID != '81720' & END > shower_start & START < shower_end])
-
-# try other showers
-l_showerID <- DT_table_test[USETYPE=='SHOWER',eventID]
-shower_start <- DT_table_test[eventID %in% l_showerID,START]
+shower_start <- DT_table[eventID %in% l_showerID,START]
 shower_end   <- DT_table_test[eventID %in% l_showerID]$END
 
-n = 1
-nrow(DT_table_test[eventID != l_showerID[n] & END > shower_start[n] & START < shower_end[n]])
+# test showerID
+this_showerID <- l_showerID[4]
+
+# number of events that coincide with a shower
+DT_table 
+  # 106954
+DT_table[eventID != this_showerID,]
+  # 106953
+DT_table[eventID != this_showerID  & END > START[this_showerID],]
+  # 61267
+DT_table[eventID != this_showerID  & START < END[this_showerID],]
+  # 45739
+DT_table[eventID != this_showerID  & END > START[this_showerID] & START < END[this_showerID],]
+  # 54 ?? has to be same KEYCODE!!
+
+
+n.events <- nrow(DT_table[eventID != this_showerID & END > START[this_showerID] & START < END[this_showerID]])
   # [1] 0
 n = 2
 nrow(DT_table_test[eventID != l_showerID[n] & END > shower_start[n] & START < shower_end[n]])

@@ -149,5 +149,9 @@ use get_table function to get shower data out of
 
 then count number of overlapping events for each shower
 
+2017-12-11
+
+get shower data (keycode, start, end, number overlaps) for all showers both EBMUD & Seattle
+
 
 
