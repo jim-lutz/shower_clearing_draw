@@ -74,30 +74,17 @@ shower_end   <- DT_table_test[eventID %in% l_showerID]$END
 this_showerID <- l_showerID[4]
 
 # number of events that coincide with a shower
-DT_table 
-  # 106954
-DT_table[eventID != this_showerID,]
-  # 106953
-DT_table[eventID != this_showerID  & END > START[this_showerID],]
-  # 61267
-DT_table[eventID != this_showerID  & START < END[this_showerID],]
-  # 45739
-DT_table[eventID != this_showerID  & END > START[this_showerID] & START < END[this_showerID],]
-  # 54 ?? has to be same KEYCODE!!
+DT_table[KEYCODE == KEYCODE[this_showerID]] 
+  # 4168
+DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID,]
+  # 4167
+DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & END > START[this_showerID],]
+  # 3438
+DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & START < END[this_showerID],]
+  # 731
+DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & END > START[this_showerID] & START < END[this_showerID],]
+  # 2 faucets
+DT_table[this_showerID]
 
-
-n.events <- nrow(DT_table[eventID != this_showerID & END > START[this_showerID] & START < END[this_showerID]])
-  # [1] 0
-n = 2
-nrow(DT_table_test[eventID != l_showerID[n] & END > shower_start[n] & START < shower_end[n]])
-  # [1] 0
-n = 3
-nrow(DT_table_test[eventID != l_showerID[n] & END > shower_start[n] & START < shower_end[n]])
-  # [1] 0
-n = 4
-nrow(DT_table_test[eventID != l_showerID[n] & END > shower_start[n] & START < shower_end[n]])
-  # [1] 1
-# found one
-
-DT_table_test[eventID %in% (81865:81870)]
-# it was a toilet flush
+n.events <- nrow(DT_table[KEYCODE == KEYCODE[this_showerID] & eventID != this_showerID  & END > START[this_showerID] & START < END[this_showerID],])
+  # [1] 2
