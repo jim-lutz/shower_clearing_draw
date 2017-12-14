@@ -153,5 +153,13 @@ then count number of overlapping events for each shower
 
 get shower data (keycode, start, end, number overlaps) for all showers both EBMUD & Seattle
 
+made a function to count the coincident events while showers are running. Applied to EBMUD data.
+Found 3 events with dates from 12/30/99 which were too early and got translated as 1899-12-30.
+Just drop those events for now.
+
+2017-12-14
+
+include study {EBMUD,Seattle}, logging {1, 2, 3 }, and meter {total, water heater}
+
 
 

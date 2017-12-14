@@ -25,33 +25,82 @@ l_tables <- c(l_tables, paste0(l_tables,' Hot Water'))
 fn_database <- fn_EBMUD_db
 db_table <- l_tables[1]
 
-# get the table
-DT_table <- get_table(fn_database, db_table)
-DT_table
-str(DT_table)
+this_database <- fn_Seattle_db
+this_table <- db_table
 
-# some modifications to make things easier later
-# add an eventID to make tracking things easier
-DT_table[,eventID:=.I]
+add_table <- function(this_database, this_table) {
+  # function to get the showers from a table and count number of coincident draws
+  # this_database is filename to database
+  # this_table is name of table to retrieve
+  
+  # get the study from this_database
+  if(str_detect(this_database, "EBMUD")) {study<-"EBMUD"} 
+  if(str_detect(this_database, "Seattle")) {study<-"Seattle"} 
+  length(study) # squawk if study not found
 
-# drop time from date
-DT_table[,DATE:=str_sub(DATE,1,10)]
+  # get logging and meter from this_table 
+  logging <- str_sub(this_table, start = 14, end = 14)
+  if(str_detect(this_table, "Hot Water")) {meter<-"hot water"} 
+  if(!str_detect(this_table, "Hot Water")) {meter<-"total water"} 
 
-# list of shower eventIDs (775)
-l_showerID <- DT_table[USETYPE=='SHOWER',eventID]
+  # get the table
+  DT_table <- get_table(this_database, this_table)
+  # DT_table
+  # str(DT_table)
 
-# test showerID
-this_eventID <- l_showerID[4]
+  # modifications to make things easier later
+  # add an eventID to make tracking things easier
+  DT_table[,eventID:=.I]
 
-DF <- coincident.events(l_showerID[4])
+  # drop time from date
+  DT_table[,DATE:=str_sub(DATE,1,10)]
 
-# call coincident.events on every shower event
-DT_coincid_showers <- data.table(ldply(.data=l_showerID,
-                                       .fun =coincident.events, 
-                                       .progress= "text", 
-                                       .inform=TRUE))
+  # list of shower eventIDs 
+  l_showerID <- DT_table[USETYPE=='SHOWER',eventID]
 
-# look at frequency of coincident draws with showers
+  # the number of events coincident to every shower event in the logging table
+  DT_coincid_showers <- data.table(ldply(.data=l_showerID,
+                                         .fun =coincident.events, 
+                                         .progress= "text", 
+                                         .inform=TRUE))
+  
+  # drop a temporary variable
+  DT_table[, coincident:=NULL]
+
+  # merge with DT_table, only keep showers 
+  setkey(DT_table, eventID)
+  setkey(DT_coincid_showers, eventID)
+  DT_showers <- merge(DT_coincid_showers,DT_table)
+
+  # add study, logging and meter
+  DT_showers[, `:=`(study   = study,
+                    logging = logging,
+                    meter   = meter)
+             ]
+  
+  # remove eventID, only used within one table
+  DT_showers[, eventID:=NULL]
+  
+  # reorder column names
+  setcolorder(DT_showers, c("study", "logging", "meter", "KEYCODE",
+                            "USETYPE", "ncoincid", "DATE", "START", "DURATION", "END", 
+                            "PEAK", "VOLUME", "MODE", "MODE NO"
+                            ))
+  
+  # return the data.table
+  return(DT_showers)
+
+}
+
+# test add_table function
+this_database <- fn_Seattle_db
+this_table <- db_table
+
+
+add_table(fn_Seattle_db, db_table)
+  
+  
+  # look at frequency of coincident draws with showers
 qplot(DT_coincid_showers$ncoincid)
 summary(DT_coincid_showers$ncoincid)
 # -1? 1102?
