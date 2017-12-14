@@ -64,13 +64,11 @@ get_table <- function(fn_database, db_table) {
 }
 
 
-coincident.events <- function(this_eventID) {
+coincident.events <- function(this_eventID, DT_table) {
   # function to return the number of events coincident to one event in a logging table
   # eventID is the number of the event for which coincidenet events are being counted
-  # operates on global DT_table 
   # DT_table is a data.table of LOGGING DATA table from Aquacraft
   #   with an added eventID data field
-  # DT_table is kept global to avoid copying it
   # returns a data.table of eventID and number of coincident events
   
   event_start <- DT_table[eventID == this_eventID, START]
@@ -89,4 +87,69 @@ coincident.events <- function(this_eventID) {
   
 }
 
+
+add_table <- function(this_table, this_database ) {
+  # function to get the showers from a table and count number of coincident draws
+  # this_table is name of table to retrieve
+  # this_database is filename to database
+  
+  # get the study from this_database
+  if(str_detect(this_database, "EBMUD")) {study<-"EBMUD"} 
+  if(str_detect(this_database, "Seattle")) {study<-"Seattle"} 
+  length(study) # squawk if study not found
+  
+  # get logging and meter from this_table 
+  logging <- str_sub(this_table, start = 14, end = 14)
+  if(str_detect(this_table, "Hot Water")) {meter<-"hot water"} 
+  if(!str_detect(this_table, "Hot Water")) {meter<-"total water"} 
+  
+  # get the table
+  DT_table <- get_table(this_database, this_table)
+  # DT_table
+  # str(DT_table)
+  
+  # modifications to make things easier later
+  # add an eventID to make tracking things easier
+  DT_table[,eventID:=.I]
+  
+  # drop time from date
+  DT_table[,DATE:=str_sub(DATE,1,10)]
+  
+  # list of shower eventIDs 
+  l_showerID <- DT_table[USETYPE=='SHOWER',eventID]
+  
+  # the number of events coincident to every shower event in the logging table
+  DT_coincid_showers <- data.table(ldply(.data=l_showerID,
+                                         .fun =coincident.events, 
+                                         DT_table,
+                                         .progress= "text", 
+                                         .inform=TRUE))
+  
+  # drop a temporary variable
+  DT_table[, coincident:=NULL]
+  
+  # merge with DT_table, only keep showers 
+  setkey(DT_table, eventID)
+  setkey(DT_coincid_showers, eventID)
+  DT_showers <- merge(DT_coincid_showers,DT_table)
+  
+  # add study, logging and meter
+  DT_showers[, `:=`(study   = study,
+                    logging = logging,
+                    meter   = meter)
+             ]
+  
+  # remove eventID, only used within one table
+  DT_showers[, eventID:=NULL]
+  
+  # reorder column names
+  setcolorder(DT_showers, c("study", "logging", "meter", "KEYCODE",
+                            "USETYPE", "ncoincid", "DATE", "START", "DURATION", "END", 
+                            "PEAK", "VOLUME", "MODE", "MODE NO"
+  ))
+  
+  # return the data.table
+  return(DT_showers)
+  
+}
 
