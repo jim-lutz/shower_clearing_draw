@@ -161,5 +161,6 @@ Just drop those events for now.
 
 include study {EBMUD,Seattle}, logging {1, 2, 3 }, and meter {total, water heater}
 
+got them all, need to clean up DT_showers.RData before going after the interval data.
 
 

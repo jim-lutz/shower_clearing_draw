@@ -21,9 +21,6 @@ fn_Seattle_db <- paste0(wd_data,"Aquacraft/Seattle/Seattle end use data.mdb")
 l_tables <- paste0("LOGGING DATA ", c('1','2','3'))
 l_tables <- c(l_tables, paste0(l_tables,' Hot Water'))
 
-# open 'LOGGING DATA 1' from Seattle end use data.mdb
-DT_showers <- add_table(l_tables[1], fn_Seattle_db)
-  
 # get all the LOGGING tables from Seattle end use data.mdb
 DT_showers1 <- data.table(ldply(.data=l_tables,
                                 .fun =add_table, 

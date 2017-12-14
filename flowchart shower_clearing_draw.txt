@@ -10,11 +10,35 @@ calc_clearing_draw.R
   # script calculate the clearing draw for showers
   input:  DT_events.RData
 
-After looking at the charts of from this and thinking about it a bit
-realised that can't use Aquacraft's event records. The mode is just
-the flow rate that shows up in the most intervals in the event. If flow
-rate during the shower varies a little bit, mode won't show the whole 
-duration of the shower. 
+    After looking at the charts of from this and thinking about it a bit
+    realised that can't use Aquacraft's event records. The mode is just
+    the flow rate that shows up in the most intervals in the event. If flow
+    rate during the shower varies a little bit, mode won't show the whole 
+    duration of the shower. 
 
-Went back to recover the Aquacraft Seattle and EBMUD conservation studies 
-where I do have the flow databases.
+    Went back to recover the Aquacraft Seattle and EBMUD conservation studies 
+    where I do have the flow databases.
+
+get_shower_class.R
+    # script to find class number for USETYPE = SHOWER from different Aquacraft datafiles
+    input: ./data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb
+
+        doesn't appear class has a unique correspondence to SHOWER.
+        it's probably some temporary variable in Aquacraft's analysis. 
+
+get_data_table.R
+    # script to test a function to get data tables from different Aquacraft datafiles
+    input:  ./data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb
+    
+        this was successful. Used mdb-export to export tables to csv file then read the csv file.
+
+get_showers.R
+    # script to get shower data from all the 'LOGGING DATA '{1|2|3}{|Hot Water} tables
+    input:  ./data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb
+            ./data/Aquacraft/Seattle/Seattle end use data.mdb
+    output: ./data/DT_showers.RData
+            
+
+       
+
+
