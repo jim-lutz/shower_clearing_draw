@@ -1,5 +1,6 @@
-# get_tdb_dates.R
-# script to get the first and last dates from all the Aquacraft EBMUD and Seattle tdb files
+# get_tdb_info.R
+# script to build a data.table of information about all the Aquacraft EBMUD and Seattle tdb files
+# includes study, logging, meter, first, last, and full filename
 # Jim Lutz "Sat Dec 16 05:48:07 2017"
 
 # set packages & etc
