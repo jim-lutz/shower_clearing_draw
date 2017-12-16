@@ -31,10 +31,27 @@ get.tdb.info <- function(this_tdb) {
   first <- first(DT_Flows$StartTime)
   last  <- last(DT_Flows$StartTime)
   
-  # add study, logging, meter?
+  # add study, logging, meter
+  # get the study from this_tdb
+  if(str_detect(this_tdb, "EBMUD")) {study<-"EBMUD"} 
+  if(str_detect(this_tdb, "Seattle")) {study<-"Seattle"} 
+  length(study) # squawk if study not found
+  
+  # get logging from this_tdb
+  if(str_detect(this_tdb, "Pre Retrofit")) {logging<-1} 
+  if(str_detect(this_tdb, "Post Retrofit 1")) {logging<-2} 
+  if(str_detect(this_tdb, "Post Retrofit 2")) {logging<-3} 
+  length(logging) # squawk if logging not found
+  
+  # get the meter from this_tdb
+  if(str_detect(this_tdb, "[0-9]hw.tdb")) {meter<-"hot water"} 
+  if(str_detect(this_tdb, "[0-9].tdb"))   {meter<-"total water"} 
+  length(meter) # squawk if meter not found
+  
+  
   
   # build data.table
-  DT_tdb <- data.table(first, last, this_tdb)
+  DT_tdb <- data.table(study, logging, meter, first, last, this_tdb)
   
   return(DT_tdb)
   
