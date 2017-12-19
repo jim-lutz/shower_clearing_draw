@@ -165,7 +165,10 @@ get.tdb.info <- function(this_tdb) {
   first.time <- first(DT_Flows$StartTime)
   last.time  <- last(DT_Flows$StartTime)
   
-  # add study, logging, meter
+  # add KEYCODE, study, logging, meter
+  # get the KEYCODE from this_tdb
+  KEYCODE <- str_extract(this_tdb,"[0-9]{5}")
+  
   # get the study from this_tdb
   if(str_detect(this_tdb, "EBMUD")) {study<-"EBMUD"} 
   if(str_detect(this_tdb, "Seattle")) {study<-"Seattle"} 
@@ -185,9 +188,8 @@ get.tdb.info <- function(this_tdb) {
   length(meter) # squawk if meter not found
   
   
-  
   # build data.table
-  DT_tdb <- data.table(study, logging, meter, first.time, last.time, this_tdb)
+  DT_tdb <- data.table(study, logging, meter, KEYCODE, first.time, last.time, this_tdb)
   
   return(DT_tdb)
   
