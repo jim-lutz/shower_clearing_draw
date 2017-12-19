@@ -42,6 +42,13 @@ get_tdb_info.R
     # script to build a data.table of information about all the Aquacraft EBMUD and Seattle tdb files
     input:  ./data/Aquacraft/{EBMUD|Seattle}/{Pre Retrofit|Post Retrofit 1|Post Retrofit 2}/*.tdb
     output: ./data/DT_tdb_info.RData
+    
+shower_intervals.R
+    # script to read DT_showers.RData and DT_tdb_info.RData 
+    input:  ./data/DT_showers.RData
+            ./data/DT_tdb_info.RData
+    output: ./data/DT_shower_interval2.RData
+
 
 
        
