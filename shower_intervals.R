@@ -50,8 +50,19 @@ DT_shower_interval2 <- DT_shower_interval[first.time<=START & END<=last.time]
 nrow(DT_shower_interval2)
 # [1] 2478, same as before
 
-
-
+# clean up names & fields 
+names(DT_shower_interval2)
+DT_shower_interval2[study.x == study.y]
+DT_shower_interval2[, `:=` (study   = study.x,
+                            study.y = NULL,
+                            study.x = NULL)
+                    ]
+DT_shower_interval2[logging.x == logging.y]
+DT_shower_interval2[, `:=` (logging   = logging.x,
+                            logging.y = NULL,
+                            logging.x = NULL)
+                    ]
+setnames(DT_shower_interval2,old = "this_tdb", new = "tdb_file")
 
 # check if have hot and total water for all the showers
 # add shower number by study, logging, meter, KEYCODE, sorted by START
@@ -72,14 +83,6 @@ DT_shower_meter <- DT_shower_interval2[, list(count=max(nshower)), by = c("study
 
 # this is easier to see
 dcast(DT_shower_meter, study + logging + KEYCODE ~ meter )[order(KEYCODE)]
-
-# clean up DT_shower_interval2 and save
-names(DT_shower_interval2)
-DT_shower_interval2[,`:=` (first.time = NULL,
-                           last.time  = NULL,
-                           tdb_file   = this_tdb,
-                           this_tdb   = NULL)
-                    ]
 
 # save DT_shower_interval2
 save(DT_shower_interval2, file = paste0(wd_data,"DT_shower_interval2.RData"))
