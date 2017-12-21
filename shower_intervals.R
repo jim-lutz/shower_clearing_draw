@@ -24,9 +24,11 @@ DT_showers[,list(KEYCODE = unique(KEYCODE)),by = c("study", "logging", "meter")]
 
 # see how many SLMKs (study, logging, meter, KEYCODE) in DT_tdb_info
 DT_tdb_info[,list(KEYCODE = unique(KEYCODE)),by = c("study", "logging", "meter")][order(KEYCODE)]
-# 113 
+# 115 
 # Why don't they match?
-# and there's 123 *.tdb files, missing some *.tdb files?
+# There's 123 *.tdb files, missing some *.tdb files?
+DT_tdb_info[,list(KEYCODE = unique(KEYCODE)),by = c("study", "logging", "meter", "tdb_name")][order(KEYCODE)]
+# 123
 
 # see what's there
 tables()
@@ -37,25 +39,19 @@ str(DT_tdb_info[,list(study,logging,meter,KEYCODE)])
 DT_showers[,logging:=as.numeric(logging)]
 DT_tdb_info[,KEYCODE:=as.integer(KEYCODE)]
 
-# keep only the SLMKs have *.tdb files for
-DT_shower_interval <- merge(DT_tdb_info,DT_showers, by = c("study", "logging", "meter", "KEYCODE"))
-# only 2779 out of 5726 showers
+# merge showers onto the interval data in *.tdb files by meter & KEYCODE, allow duplicates
+DT_shower_interval <- merge(DT_tdb_info,DT_showers, by = c("meter", "KEYCODE"), allow.cartesian=TRUE)
+nrow(DT_shower_interval)
+# [1] 8105
 
-# check to see if showers within *.tdb times
-DT_shower_interval[first.time<=START & END<=last.time,]
-# 2479
-# so some of the showers aren't in the interval data time frame?
-DT_shower_interval[first.time>START, list(study, logging, meter, KEYCODE,
-                                          first.time, last.time,
-                                          START, END)
-                                          ]
+# keep only showers that end before and start after the interval data does
+names(DT_shower_interval)
+DT_shower_interval2 <- DT_shower_interval[first.time<=START & END<=last.time]
+nrow(DT_shower_interval2)
+# [1] 2478, same as before
 
-DT_shower_interval[END>last.time, list(study, logging, meter, KEYCODE,
-                                          first.time, last.time,
-                                          START, END)
-                   ]
-# looks like that's the case, lost another 300 showers.
-DT_shower_interval2 <- DT_shower_interval[first.time<=START & END<=last.time,]
+
+
 
 # check if have hot and total water for all the showers
 # add shower number by study, logging, meter, KEYCODE, sorted by START
