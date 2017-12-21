@@ -168,9 +168,12 @@ got them all, need to clean up DT_showers.RData before going after the interval 
 winnowed out showers that aren't in both the logging and interval databases. initial look at hot vs total
 
 next steps? 
-    keep only ones that can identify both hot and total
+    X   keep only ones that can identify both hot and total
     make a new interval data file for each shower by study logging meter KEYCODE
     synchronize times by minimizing difference in end times hot and total 
         by study, logging and KEYCODE
-    function to chart total and hot vs time given a shower
+
+2017-12-21
+    next steps 
+        function to chart total and hot vs time given a shower by SLK & times
 

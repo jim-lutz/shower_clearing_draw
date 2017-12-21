@@ -48,7 +48,15 @@ shower_intervals.R
     input:  ./data/DT_showers.RData
             ./data/DT_tdb_info.RData
     output: ./data/DT_shower_interval2.RData
+    
+        this output identifies the files that contains interval data for each shower
 
+shower_matching.R
+    # script to find hot and total water for showers
+    input:  ./data/DT_shower_interval2.RData
+    output: ./data/DT_shower_interval4.RData
+ 
+        this output is mostly limited to showers with both hot and total water
 
 
        
