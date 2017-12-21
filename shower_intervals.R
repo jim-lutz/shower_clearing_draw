@@ -22,11 +22,11 @@ load(file = paste0(wd_data,"DT_tdb_info.RData"))
 DT_showers[,list(KEYCODE = unique(KEYCODE)),by = c("study", "logging", "meter")][order(KEYCODE)]
 # 259
 
-# see how many SLMKs (study, logging, meter, KEYCODE) in DT_showers
+# see how many SLMKs (study, logging, meter, KEYCODE) in DT_tdb_info
 DT_tdb_info[,list(KEYCODE = unique(KEYCODE)),by = c("study", "logging", "meter")][order(KEYCODE)]
 # 113 
 # Why don't they match?
-# only 123 *.tdb files
+# and there's 123 *.tdb files, missing some *.tdb files?
 
 # see what's there
 tables()
