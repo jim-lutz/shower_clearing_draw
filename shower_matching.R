@@ -11,7 +11,7 @@ source("setup_wd.R")
 # get some useful functions
 source("functions.R")
 
-# load DT_showers.RData
+# load DT_shower_interval2.RData
 load(file = paste0(wd_data,"DT_shower_interval2.RData"))
 
 # see how many hot/total pairs
