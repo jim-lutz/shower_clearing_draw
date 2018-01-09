@@ -22,11 +22,25 @@ DT_shower_meter <- DT_shower_interval4[, list(count=max(nshower)), by = c("study
 # this is easier to see
 dcast(DT_shower_meter, study + logging + KEYCODE ~ meter )[order(KEYCODE)]
 
+# find some temporary values for testing plotting function
+DT_shower_interval4[study == "Seattle" &
+                      logging == 1 &
+                      KEYCODE == 13197, list(meter, nshower, START, END, VOLUME) ][order(START)]
+
+# try this
+s='Seattle' 
+l=1 
+k=13197 
+DT=DT_shower_interval4 
+t1="1999-10-28 05:10:00"
+t2="1999-10-28 05:30:00"
+save.charts=FALSE
+
 
 
 
 # plotting function originally from /home/jiml/HotWaterResearch/projects/CECHWT24/scripts/functions.R
-plot_kWGPM <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4, 
+plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4, 
                         t1, t2, save.charts=FALSE) {
   # function to plot power and water flow for one siteID
   # s = study               - Seattle | EBMUD
@@ -37,20 +51,53 @@ plot_kWGPM <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # t1                      - string ofYYYY-MM-DD hh:mm:ss for start of chart
   # t2                      - string ofYYYY-MM-DD hh:mm:ss for end of chart
   # save.charts             - logical to save charts
-  # these need to be global for this function to work
+  # this needs to be global for this function to work
   # wd_charts = work directory for charts
   
-  # str(DT_info)
+  # str(DT)
+
+  # get the filename of the total water interval data
+  tw_file <- DT[study==s & logging==l & KEYCODE==k & meter=='total water',list(tdw_file=unique(tdb_file))]
   
-  # get timezone of siteID
-  tz=as.character(DT_info[siteID==s,]$tz)
+  # load the total water Flow data as a data.table
+  DT_tw_flows <- get_table(fn_database = tw_file, db_table = 'Flows')
   
-  # get posix times from unit_date
+  # add meter='total water'
+  DT_tw_flows[,meter:='total water']
+  
+  # get the filename of the hot water interval data
+  hw_file <- DT[study==s & logging==l & KEYCODE==k & meter=='hot water',list(tdw_file=unique(tdb_file))]
+  
+  # load the total water Flow data as a data.table
+  DT_hw_flows <- get_table(fn_database = hw_file, db_table = 'Flows')
+  
+  # add meter='hot water'
+  DT_hw_flows[,meter:='hot water']
+  
+  # concatenate the flows data.tables
+  DT_flows <- rbind(DT_tw_flows, DT_hw_flows)
+  
+  # interim clean up
+  rm(DT_tw_flows, DT_hw_flows)
+  
+  # set timezone, all these Aquacraft sites are in the Pacific time zone
+  tz="America/Los_Angeles"
+  
+  # convert StartTime to posix times
+  DT_flows[,date.time:=ymd_hms(StartTime, tz=tz)]
+  
+  # get posix times from t1 & t2
   start = ymd_hms(t1, tz=tz)
   end   = ymd_hms(t2, tz=tz)
+
+  # get the total and hot water flows for the desired times
+  DT_subset_flows <- DT_flows[date.time>=start & date.time<=end, list(Rate,meter),by="date.time"]  
   
-  # configure breaks and labels
-  span = as.numeric(as.duration(new_interval(start, end)))/60 # minutes
+  
+    
+# turn this into a separate function later
+  # configure breaks and labels appropriately for t1 & t2
+  span = as.numeric(as.duration(interval(start, end)))/60 # minutes
   # breaks = date_breaks("2 hours"), labels = date_format("%H:%M")
   # looking for approx 8 - 12 breaks across span
   if(span>0)             {dbreaks = "1 min";         dlabels = "%H:%M" ; xlabel="time"}
@@ -70,22 +117,19 @@ plot_kWGPM <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   if(span>(365*24*60))   {dbreaks = "2 months";      dlabels = "%b" }       # 1 year
   if(span>(2*365*24*60)) {dbreaks = "4 months";      dlabels = "%b %y" }    # 2 years
   
-  # get the kW and GPM data for the desired times
-  DT_subset_data <- DT_data[date_time>=start & date_time<=end, list(kW=hpwhW/1000,GPM=Flow),by="date_time"]  
   
-  # make a data.table of a set of minutes with 0 as value.
-  DT_set.of.minutes <- data.table(date_time=seq(from=start, to=end, by=dminutes(1) ), zero=0 )
-  # str(DT_set.of.minutes )
-  setkey(DT_set.of.minutes,date_time)
-  
-  # merge sample with day of minutes
-  # to deal with missing records, if any
-  DT_set.of.data <- merge(DT_set.of.minutes,DT_subset_data,all.x=TRUE)
+  # make a data.table of a set of seconds with 0 as value.
+  DT_set.of.seconds <- data.table(date.time=seq(from=start, to=end, by=dseconds(1) ), Rate=0, meter='zero' )
+  # str(DT_set.of.seconds )
+  # str(DT_subset_flows )
+
+  # combine subset of flows with set.of.seconds
+  DT_set.of.data <- rbind(DT_set.of.seconds,DT_subset_flows)
   
   # str(DT_set.of.data)
   
   # turn NA GPM & kW to zero
-  summary(DT_set.of.data$GPM)
+  summary(DT_set.of.data$)
   DT_set.of.data$GPM[is.na(DT_set.of.data$GPM)] <- 0
   summary(DT_set.of.data$GPM)
   

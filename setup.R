@@ -21,7 +21,7 @@ cat("\014")
 update.packages(checkBuilt=TRUE)
 
 sessionInfo() 
-  # R version 3.4.2 (2017-09-28)
+  # R version 3.4.3 (2017-11-30)
   # Platform: x86_64-pc-linux-gnu (64-bit)
   # Running under: Ubuntu 16.04.3 LTS
 
