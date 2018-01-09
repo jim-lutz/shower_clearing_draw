@@ -177,3 +177,7 @@ next steps?
     next steps 
         function to chart total and hot vs time given a shower by SLK & times
 
+2018-01-08
+    imported plot_GPMkWh from CECHWT24/scripts/functions.R
+    started to modify it to deal w/ Aquacraft data
+    refactor GPM to 'total water' and kWh to 'hot water'?
