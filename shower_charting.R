@@ -83,17 +83,10 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   DT_hw_flows[,list(n.intevals=length(StartTime)),by=StartTime][order(-n.intevals)]
   # OK
   
-  # concatenate the flows data.tables
-  DT_flows <- rbind(DT_tw_flows, DT_hw_flows)
-  
-  # interim clean up
-  # rm(DT_tw_flows, DT_hw_flows)
-  
   # set timezone, all these Aquacraft sites are in the Pacific time zone
   tz="America/Los_Angeles"
   
   # convert StartTime to posix times
-  DT_flows[,date.time:=ymd_hms(StartTime, tz=tz)]
   DT_tw_flows[,date.time:=ymd_hms(StartTime, tz=tz)]
   DT_hw_flows[,date.time:=ymd_hms(StartTime, tz=tz)]
   
@@ -142,96 +135,36 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   DT_intervals <- merge(merge(DT_set.of.seconds, DT_tw_flows, all=TRUE)
                         , DT_hw_flows, all=TRUE)
 
-  
-    DT_intervals <- merge(DT_set.of.seconds, DT_tw_flows, all=TRUE)
-  DT_intervals[Rate.y>0]
-  DT_intervals <- merge(DT_intervals, DT_hw_flows, all=TRUE)
-  
   # clean up DT_intervals
   setnames(DT_intervals, old = c("Rate.x", "Rate.y", "Rate"), 
-           new = c("Rate.zero", "Rate.total", "Rate.hot" ))
+           new = c("zero", "total.water", "hot.water" ))
   DT_intervals[, `:=` (meter.x = NULL,
                        meter.y = NULL,
                        meter   = NULL)]
   
   # turn NAs to 0
-  DT_intervals[is.na(Rate.total), Rate.total:=0]
-  DT_intervals[is.na(Rate.hot)  , Rate.hot  :=0]
+  DT_intervals[is.na(total.water), total.water:=0]
+  DT_intervals[is.na(hot.water)  , hot.water  :=0]
   
   summary(DT_intervals)
   # hot > total?
   
-  DT_intervals2 <- DT_intervals
-
-  DT_intervals2[ ymd_hms("1999-11-02 19:25:00", tz=tz)<=date.time & 
-                   date.time<=ymd_hms("1999-11-02 19:26:00", tz=tz) 
-                 ,]
-   
-  DT_intervals2[, v1 := shift(Rate.total, n = 1, fill = 0)]
-  DT_intervals2[, v2 := shift(Rate.total, n = 2, fill = 0)]
-  DT_intervals2[, c("v3","v4") := shift(Rate.total, n = 3:4, fill = 0)]
-  DT_intervals2[, paste0("v",0:9) := shift(Rate.total, n = 0:9, fill = 0)]
-  DT_intervals2[, Rate.total.new := rowSums(.SD), .SDcols = paste0("v",0:9) ]
-  DT_intervals2[, paste0("v",0:9) := NULL]
+  # lag total.water across itself the subsequent 10 seconds 
+  # this may cause problems when the TraceWizard intervals aren't exactly 10 seconds
+  DT_intervals[, paste0("v",0:9) := shift(total.water, n = 0:9, fill = 0)]
+  DT_intervals[, total.water := rowSums(.SD), .SDcols = paste0("v",0:9) ]
+  DT_intervals[, paste0("v",0:9) := NULL]
   
+  # lag hot.water across itself the subsequent 10 seconds 
+  DT_intervals[, paste0("v",0:9) := shift(hot.water, n = 0:9, fill = 0)]
+  DT_intervals[, hot.water := rowSums(.SD), .SDcols = paste0("v",0:9) ]
+  DT_intervals[, paste0("v",0:9) := NULL]
   
-  DT_intervals2[ ymd_hms("1999-11-02 19:25:00", tz=tz)<=date.time & 
+  DT_intervals[ ymd_hms("1999-11-02 19:25:00", tz=tz)<=date.time & 
                    date.time<=ymd_hms("1999-11-02 19:26:00", tz=tz) 
                  ,]
   
-  
-  
-  
-  DT_intervals2 <- 
-    DT_intervals2 %>% 
-    mutate(Rate.total1 = dplyr::lag(Rate.total, n = 1, default = 0)) %>% 
-    mutate(Rate.total2 = dplyr::lag(Rate.total, n = 2, default = 0)) %>% 
-    mutate(Rate.total3 = dplyr::lag(Rate.total, n = 3, default = 0)) %>% 
-    mutate(Rate.total4 = dplyr::lag(Rate.total, n = 4, default = 0)) %>% 
-    mutate(Rate.total5 = dplyr::lag(Rate.total, n = 5, default = 0)) %>% 
-    mutate(Rate.total6 = dplyr::lag(Rate.total, n = 6, default = 0)) %>% 
-    mutate(Rate.total7 = dplyr::lag(Rate.total, n = 7, default = 0)) %>% 
-    mutate(Rate.total8 = dplyr::lag(Rate.total, n = 8, default = 0)) %>% 
-    mutate(Rate.total9 = dplyr::lag(Rate.total, n = 9, default = 0)) 
-
-  DT_intervals3 <- data.table(DT_intervals2)
-  
-  # # rowSums(cbind(Rt, 
-  #               c(0,Rt[1:(n.rows-1)]), 
-  #               c(0,0,Rt[1:(n.rows-2)]) ))
-  
-  
-  # DT_intervals2[Rate.total>0]
-  DT_intervals3[ ymd_hms("1999-11-02 19:25:00", tz=tz)<=date.time & 
-                  date.time<=ymd_hms("1999-11-02 19:26:00", tz=tz) 
-                ,list(date.time,Rate.total.new,Rate.total,Rate.total1, Rate.total2, Rate.total3)]
-
-  DT_intervals3[,Rate.total.new := Rate.total + Rate.total1 + Rate.total2 + Rate.total3]
-
-  str(DT_intervals2)
-  
-  
-  
-  DT_set.of.seconds[DT_tw_flows, on="date.time", with=FALSE, mult="all", nomatch=NA, roll= TRUE, verbose=TRUE]
-  DT_set.of.seconds[DT_tw_flows, list(Rate, meter), nomatch=0, roll= TRUE, keyby=date.time]
-  
-  DT_set.of.data <- rbind(DT_set.of.seconds,DT_subset_flows)
-  
-  # str(DT_set.of.data)
-  # look at data
-  # summary(DT_set.of.data)
-
-  # recast DT_set.of.data so total water, hot water and zero 
-  # are listed for each 10 second interval
-  DT_intervals <- dcast(DT_set.of.data, date.time ~ meter, value.var = "Rate", 
-                        fun = sum, drop = TRUE)
-  summary(DT_intervals)
-  str(DT_intervals)
-  
-  # clean up the variable names
-  setnames(DT_intervals, old = c('hot water', 'total water'), new = c('hot.water', 'total.water'))
-  
-# trying to draw 10 second rectangles whenever there is total water or hot water draw
+# draw 1 second rectangles whenever there is total water or hot water draw
 # if it's only hot water, draw a red rectangle   
 # if it's only total water, draw a blue rectangle
 # if it's both, 
@@ -249,9 +182,7 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
 
   # check if total.water and hot.water ever occur during the same interval
   DT_intervals[total.water>0 & hot.water>0,list(date.time, total.water, hot.water)]
-  # Empty data.table (0 rows) of 3 cols: date.time,total.water,hot.water
-  # something's wrong
-  
+
   # set up overlap rectangles
   DT_intervals[,overlap.max:=pmin(hot_water.max,total_water.max)]
   DT_intervals[,overlap.min:=0]
