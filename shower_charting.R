@@ -15,12 +15,13 @@ source("functions.R")
 load(file = paste0(wd_data,"DT_shower_interval4.RData"))
 
 DT_shower_interval4
+names(DT_shower_interval4)
 
 # now see how many hot/total pairs
 DT_shower_meter <- DT_shower_interval4[, list(count=max(nshower)), by = c("study", "logging", "meter", "KEYCODE")][order(KEYCODE)]
 
 # this is easier to see
-dcast(DT_shower_meter, study + logging + KEYCODE ~ meter )[order(KEYCODE)]
+dcast(DT_shower_meter, study + KEYCODE + logging ~ meter )[order(KEYCODE)]
 
 # find some temporary values for testing plotting function
 DT_shower_interval4[study == "Seattle" &
@@ -57,7 +58,7 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # str(DT)
 
   # get the filename of the total water interval data
-  tw_file <- DT[study==s & logging==l & KEYCODE==k & meter=='total water',list(tdw_file=unique(tdb_file))]
+  tw_file <- DT[study==s & KEYCODE==k & logging==l & meter=='total water',list(tdw_file=unique(tdb_file))]
   
   # load the total water Flow data as a data.table
   DT_tw_flows <- get_table(fn_database = tw_file, db_table = 'Flows')
@@ -66,7 +67,7 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   DT_tw_flows[,meter:='total water']
   
   # get the filename of the hot water interval data
-  hw_file <- DT[study==s & logging==l & KEYCODE==k & meter=='hot water',list(tdw_file=unique(tdb_file))]
+  hw_file <- DT[study==s & KEYCODE==k & logging==l & meter=='hot water',list(tdw_file=unique(tdb_file))]
   
   # load the total water Flow data as a data.table
   DT_hw_flows <- get_table(fn_database = hw_file, db_table = 'Flows')
@@ -87,17 +88,18 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   DT_flows[,date.time:=ymd_hms(StartTime, tz=tz)]
   
   # get posix times from t1 & t2
-  start = ymd_hms(t1, tz=tz)
-  end   = ymd_hms(t2, tz=tz)
+  t_start = ymd_hms(t1, tz=tz)
+  t_end   = ymd_hms(t2, tz=tz)
 
   # get the total and hot water flows for the desired times
-  DT_subset_flows <- DT_flows[date.time>=start & date.time<=end, list(Rate,meter),by="date.time"]  
+  DT_subset_flows <- DT_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
   
   
     
 # turn this into a separate function later
   # configure breaks and labels appropriately for t1 & t2
-  span = as.numeric(as.duration(interval(start, end)))/60 # minutes
+  # calculates span in minutes
+  span = as.numeric(as.duration(interval(t_start, t_end)))/60 # minutes
   # breaks = date_breaks("2 hours"), labels = date_format("%H:%M")
   # looking for approx 8 - 12 breaks across span
   if(span>0)             {dbreaks = "1 min";         dlabels = "%H:%M" ; xlabel="time"}
@@ -119,7 +121,7 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   
   
   # make a data.table of a set of seconds with 0 as value.
-  DT_set.of.seconds <- data.table(date.time=seq(from=start, to=end, by=dseconds(1) ), Rate=0, meter='zero' )
+  DT_set.of.seconds <- data.table(date.time=seq(from=t_start, to=t_end, by=dseconds(1) ), Rate=0, meter='zero' )
   # str(DT_set.of.seconds )
   # str(DT_subset_flows )
 
@@ -127,41 +129,50 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   DT_set.of.data <- rbind(DT_set.of.seconds,DT_subset_flows)
   
   # str(DT_set.of.data)
+  # look at data
+  # summary(DT_set.of.data)
+
+  # recast DT_set.of.data so total water, hot water and zero 
+  # are listed for each 10 second interval
+  dcast(DT_shower_meter, study + KEYCODE + logging ~ meter )[order(KEYCODE)]
+  DT_intervals <- dcast(DT_set.of.data, date.time ~ meter, value.var = "Rate")
+  summary
   
-  # turn NA GPM & kW to zero
-  summary(DT_set.of.data$)
-  DT_set.of.data$GPM[is.na(DT_set.of.data$GPM)] <- 0
-  summary(DT_set.of.data$GPM)
+# trying to draw 10 second rectangles whenever there is total water or hot water draw
+# if it's only hot water, draw a red rectangle   
+# if it's only total water, draw a blue rectangle
+# if it's both, 
+  # draw a purple rectangle where they overlap
+  # draw a blue rectangle where total water is greater than hot water
+  # draw a red rectangle where hot water is greater than total water  
+
+  # set min and max for hot water rectangles
+  DT_set.of.data[,hot_water.min:=0]
+  DT_set.of.data[,hot_water.max:=0]
+  DT_set.of.data[meter=='hot water',hot_water.max:=Rate]
   
-  summary(DT_set.of.data$kW)
-  DT_set.of.data$kW[is.na(DT_set.of.data$kW)] <- 0
-  summary(DT_set.of.data$kW)
-  
-  # set max and min for kW rectangles
-  DT_set.of.data[,kW.max:=kW]
-  DT_set.of.data[,kW.min:=0]
-  
-  # set max and min for GPM rectangles
-  DT_set.of.data[,GPM.max:=GPM]
-  DT_set.of.data[,GPM.min:=0]
+  # set min and max for total water rectangles
+  DT_set.of.data[,total_water.min:=0]
+  DT_set.of.data[,total_water.max:=0]
+  DT_set.of.data[meter=='total water',total_water.max:=Rate]
   
   # set up overlap rectangles
-  DT_set.of.data[,overlap.max:=pmin(kW.max,GPM.max)]
+  DT_set.of.data[,overlap.max:=pmin(hot_water.max,total_water.max)]
   DT_set.of.data[,overlap.min:=0]
   
-  # handle GPM when overlap
-  # GPM > overlap.max, reset GPM.min 
-  DT_set.of.data[GPM > overlap.max, GPM.min:=overlap.max]
+  # handle total_water when overlap
+  # total_water.max > overlap.max, reset total_water.min 
+  DT_set.of.data[total_water.max > overlap.max, total_water.min:=overlap.max]
   
-  # GPM <= overlap.max, reset GPM.max 
-  DT_set.of.data[GPM <= overlap.max, GPM.max:=0]
+  # total_water.max <= overlap.max, reset total_water.max 
+  DT_set.of.data[total_water.max <= overlap.max, total_water.max:=0]
   
-  # handle kW when overlap
-  # kW > overlap.max, reset kW.min 
-  DT_set.of.data[kW > overlap.max, kW.min:=overlap.max]
+  # handle hot_water when overlap
+  # hot_water.max > overlap.max, reset hot_water.min 
+  DT_set.of.data[hot_water.max > overlap.max, hot_water.min:=overlap.max]
   
-  # kW <= overlap.max, reset kW.max 
-  DT_set.of.data[kW <= overlap.max, kW.max:=0]
+  # hot_water.max <= overlap.max, reset hot_water.max 
+  DT_set.of.data[hot_water.max <= overlap.max, hot_water.max:=0]
   
   
   # make blank plot
@@ -175,10 +186,10 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   p2 <- p2 + coord_cartesian(ylim = c(0.01, 5)) 
   
   # plot kW using pink rectangles
-  p2 <- p2 + geom_rect(aes(xmin = date_time, xmax = date_time + dminutes(1), ymin = kW.min, ymax = kW.max), color="deeppink", fill="deeppink") 
+  p2 <- p2 + geom_rect(aes(xmin = date_time, xmax = date_time + dminutes(1), ymin = hot_water.min, ymax = hot_water.max), color="deeppink", fill="deeppink") 
   
   # plot GPM using blue rectangles
-  p2 <- p2 + geom_rect(aes(xmin = date_time, xmax = date_time + dminutes(1), ymin = GPM.min, ymax = GPM.max), color="deepskyblue", fill="deepskyblue") 
+  p2 <- p2 + geom_rect(aes(xmin = date_time, xmax = date_time + dminutes(1), ymin = total_water.min, ymax = total_water.max), color="deepskyblue", fill="deepskyblue") 
   
   # plot overlap using purple rectangles
   p2 <- p2 + geom_rect(aes(xmin = date_time, xmax = date_time + dminutes(1), ymin = overlap.min, ymax = overlap.max), color="purple", fill="purple") 

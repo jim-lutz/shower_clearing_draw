@@ -181,3 +181,6 @@ next steps?
     imported plot_GPMkWh from CECHWT24/scripts/functions.R
     started to modify it to deal w/ Aquacraft data
     refactor GPM to 'total water' and kWh to 'hot water'?
+    
+2018-01-12
+    Also think about shower waste calculated from TraceWizard parameters to what see with charts.    

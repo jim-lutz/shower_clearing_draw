@@ -42,6 +42,12 @@ library(data.table)
 if(!require(tidyverse)){install.packages("tidyverse")}
 library(tidyverse)
 
+# work with lubridate 
+if(!require(lubridate)){install.packages("lubridate")}
+library(lubridate)
+# part of tidyverse but wasn't seeing it
+
+
 # work with stringr 
 # if(!require(stringr)){install.packages("stringr")}
 # library(stringr)
