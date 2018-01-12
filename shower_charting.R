@@ -101,51 +101,49 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   t_start = ymd_hms(t1, tz=tz)
   t_end   = ymd_hms(t2, tz=tz)
 
-  # restrict the total and hot water flows for the desired times
-  DT_subset_flows <- DT_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
+  # restrict the total water and hot water flows for the desired times
   DT_tw_flows <- DT_tw_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
   DT_hw_flows <- DT_hw_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
   
   
     
-# turn this into a separate function later
-  # configure breaks and labels appropriately for t1 & t2
-  # calculates span in minutes
-  span = as.numeric(as.duration(interval(t_start, t_end)))/60 # minutes
-  # breaks = date_breaks("2 hours"), labels = date_format("%H:%M")
-  # looking for approx 8 - 12 breaks across span
-  if(span>0)             {dbreaks = "1 min";         dlabels = "%H:%M" ; xlabel="time"}
-  if(span>10)            {dbreaks = "2 mins";        dlabels = "%H:%M" }
-  if(span>30)            {dbreaks = "5 mins";        dlabels = "%H:%M" }
-  if(span>60)            {dbreaks = "20 mins";       dlabels = "%H:%M" }
-  if(span>180)           {dbreaks = "30 mins";       dlabels = "%H:%M" }
-  if(span>360)           {dbreaks = "60 mins";       dlabels = "%H:%M" }
-  if(span>720)           {dbreaks = "2 hours";       dlabels = "%H:%M" }
-  if(span>(24*60))       {dbreaks = "3 hours";       dlabels = "%H:%M" }    # 1 day
-  if(span>(3*24*60))     {dbreaks = "12 hours";       dlabels = "%e %Hh"; xlabel="date" } # 3 days
-  if(span>(7*24*60))     {dbreaks = "1 day";      dlabels = "%e"  } # 1 week
-  if(span>(14*24*60))    {dbreaks = "1 day";         dlabels = "%b-%d" }    # 2 weeks
-  if(span>(30*24*60))    {dbreaks = "3 days";        dlabels = "%b-%d" }    # 1 month
-  if(span>(90*24*60))    {dbreaks = "1 week";        dlabels = "%b-%d" }    # 3 months
-  if(span>(120*24*60))   {dbreaks = "2 weeks";       dlabels = "%b-%d" }    # 6 months
-  if(span>(365*24*60))   {dbreaks = "2 months";      dlabels = "%b" }       # 1 year
-  if(span>(2*365*24*60)) {dbreaks = "4 months";      dlabels = "%b %y" }    # 2 years
+# # turn this into a separate function later
+#   # configure breaks and labels appropriately for t1 & t2
+#   # calculates span in minutes
+#   span = as.numeric(as.duration(interval(t_start, t_end)))/60 # minutes
+#   # breaks = date_breaks("2 hours"), labels = date_format("%H:%M")
+#   # looking for approx 8 - 12 breaks across span
+#   if(span>0)             {dbreaks = "1 min";         dlabels = "%H:%M" ; xlabel="time"}
+#   if(span>10)            {dbreaks = "2 mins";        dlabels = "%H:%M" }
+#   if(span>30)            {dbreaks = "5 mins";        dlabels = "%H:%M" }
+#   if(span>60)            {dbreaks = "20 mins";       dlabels = "%H:%M" }
+#   if(span>180)           {dbreaks = "30 mins";       dlabels = "%H:%M" }
+#   if(span>360)           {dbreaks = "60 mins";       dlabels = "%H:%M" }
+#   if(span>720)           {dbreaks = "2 hours";       dlabels = "%H:%M" }
+#   if(span>(24*60))       {dbreaks = "3 hours";       dlabels = "%H:%M" }    # 1 day
+#   if(span>(3*24*60))     {dbreaks = "12 hours";      dlabels = "%e %Hh"; xlabel="date" } # 3 days
+#   if(span>(7*24*60))     {dbreaks = "1 day";         dlabels = "%e"  }      # 1 week
+#   if(span>(14*24*60))    {dbreaks = "1 day";         dlabels = "%b-%d" }    # 2 weeks
+#   if(span>(30*24*60))    {dbreaks = "3 days";        dlabels = "%b-%d" }    # 1 month
+#   if(span>(90*24*60))    {dbreaks = "1 week";        dlabels = "%b-%d" }    # 3 months
+#   if(span>(120*24*60))   {dbreaks = "2 weeks";       dlabels = "%b-%d" }    # 6 months
+#   if(span>(365*24*60))   {dbreaks = "2 months";      dlabels = "%b" }       # 1 year
+#   if(span>(2*365*24*60)) {dbreaks = "4 months";      dlabels = "%b %y" }    # 2 years
   
   
   # make a data.table of a set of seconds with 0 as value.
   DT_set.of.seconds <- data.table(date.time=seq(from=t_start, to=t_end, by=dseconds(1) ), Rate=0, meter='zero' )
   # str(DT_set.of.seconds )
-  # str(DT_subset_flows )
 
-  # combine subset of flows with DT_set.of.seconds
-  DT_tw_flows
-  str(DT_tw_flows)
-  
   # merge DT_set.of.seconds, DT_tw_flows, and DT_hw_flows
   setkey(DT_set.of.seconds, date.time)
   setkey(DT_tw_flows, date.time)
   setkey(DT_hw_flows, date.time)
-  DT_intervals <- merge(DT_set.of.seconds, DT_tw_flows, all=TRUE)
+  DT_intervals <- merge(merge(DT_set.of.seconds, DT_tw_flows, all=TRUE)
+                        , DT_hw_flows, all=TRUE)
+
+  
+    DT_intervals <- merge(DT_set.of.seconds, DT_tw_flows, all=TRUE)
   DT_intervals[Rate.y>0]
   DT_intervals <- merge(DT_intervals, DT_hw_flows, all=TRUE)
   
@@ -164,12 +162,25 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # hot > total?
   
   DT_intervals2 <- DT_intervals
-  # shift(DT_intervals2[Rate.total>0], n=1:9, fill=DT_intervals[Rate.total>0]$Rate.total)
-  # n.rows <- nrow(DT_intervals2)
-  # DT_intervals2[1:n.rows]$Rate.total 
-  # DT_intervals2[2:n.rows]$Rate.total 
-  # DT_intervals2[,Rate.total1:=Rate.total[(-1)+.I] ]
-  # DT_intervals2[,Rate.total1 := shift(Rate.total, n = 1, default = 0)]
+
+  DT_intervals2[ ymd_hms("1999-11-02 19:25:00", tz=tz)<=date.time & 
+                   date.time<=ymd_hms("1999-11-02 19:26:00", tz=tz) 
+                 ,]
+   
+  DT_intervals2[, v1 := shift(Rate.total, n = 1, fill = 0)]
+  DT_intervals2[, v2 := shift(Rate.total, n = 2, fill = 0)]
+  DT_intervals2[, c("v3","v4") := shift(Rate.total, n = 3:4, fill = 0)]
+  DT_intervals2[, paste0("v",0:9) := shift(Rate.total, n = 0:9, fill = 0)]
+  DT_intervals2[, Rate.total.new := rowSums(.SD), .SDcols = paste0("v",0:9) ]
+  DT_intervals2[, paste0("v",0:9) := NULL]
+  
+  
+  DT_intervals2[ ymd_hms("1999-11-02 19:25:00", tz=tz)<=date.time & 
+                   date.time<=ymd_hms("1999-11-02 19:26:00", tz=tz) 
+                 ,]
+  
+  
+  
   
   DT_intervals2 <- 
     DT_intervals2 %>% 
