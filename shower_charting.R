@@ -141,9 +141,67 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   DT_tw_flows
   str(DT_tw_flows)
   
+  # merge DT_set.of.seconds, DT_tw_flows, and DT_hw_flows
   setkey(DT_set.of.seconds, date.time)
   setkey(DT_tw_flows, date.time)
-  DT_set.of.seconds[DT_tw_flows, nomatch=NA, roll= TRUE]
+  setkey(DT_hw_flows, date.time)
+  DT_intervals <- merge(DT_set.of.seconds, DT_tw_flows, all=TRUE)
+  DT_intervals[Rate.y>0]
+  DT_intervals <- merge(DT_intervals, DT_hw_flows, all=TRUE)
+  
+  # clean up DT_intervals
+  setnames(DT_intervals, old = c("Rate.x", "Rate.y", "Rate"), 
+           new = c("Rate.zero", "Rate.total", "Rate.hot" ))
+  DT_intervals[, `:=` (meter.x = NULL,
+                       meter.y = NULL,
+                       meter   = NULL)]
+  
+  # turn NAs to 0
+  DT_intervals[is.na(Rate.total), Rate.total:=0]
+  DT_intervals[is.na(Rate.hot)  , Rate.hot  :=0]
+  
+  summary(DT_intervals)
+  # hot > total?
+  
+  DT_intervals2 <- DT_intervals
+  # shift(DT_intervals2[Rate.total>0], n=1:9, fill=DT_intervals[Rate.total>0]$Rate.total)
+  # n.rows <- nrow(DT_intervals2)
+  # DT_intervals2[1:n.rows]$Rate.total 
+  # DT_intervals2[2:n.rows]$Rate.total 
+  # DT_intervals2[,Rate.total1:=Rate.total[(-1)+.I] ]
+  # DT_intervals2[,Rate.total1 := shift(Rate.total, n = 1, default = 0)]
+  
+  DT_intervals2 <- 
+    DT_intervals2 %>% 
+    mutate(Rate.total1 = dplyr::lag(Rate.total, n = 1, default = 0)) %>% 
+    mutate(Rate.total2 = dplyr::lag(Rate.total, n = 2, default = 0)) %>% 
+    mutate(Rate.total3 = dplyr::lag(Rate.total, n = 3, default = 0)) %>% 
+    mutate(Rate.total4 = dplyr::lag(Rate.total, n = 4, default = 0)) %>% 
+    mutate(Rate.total5 = dplyr::lag(Rate.total, n = 5, default = 0)) %>% 
+    mutate(Rate.total6 = dplyr::lag(Rate.total, n = 6, default = 0)) %>% 
+    mutate(Rate.total7 = dplyr::lag(Rate.total, n = 7, default = 0)) %>% 
+    mutate(Rate.total8 = dplyr::lag(Rate.total, n = 8, default = 0)) %>% 
+    mutate(Rate.total9 = dplyr::lag(Rate.total, n = 9, default = 0)) 
+
+  DT_intervals3 <- data.table(DT_intervals2)
+  
+  # # rowSums(cbind(Rt, 
+  #               c(0,Rt[1:(n.rows-1)]), 
+  #               c(0,0,Rt[1:(n.rows-2)]) ))
+  
+  
+  # DT_intervals2[Rate.total>0]
+  DT_intervals3[ ymd_hms("1999-11-02 19:25:00", tz=tz)<=date.time & 
+                  date.time<=ymd_hms("1999-11-02 19:26:00", tz=tz) 
+                ,list(date.time,Rate.total.new,Rate.total,Rate.total1, Rate.total2, Rate.total3)]
+
+  DT_intervals3[,Rate.total.new := Rate.total + Rate.total1 + Rate.total2 + Rate.total3]
+
+  str(DT_intervals2)
+  
+  
+  
+  DT_set.of.seconds[DT_tw_flows, on="date.time", with=FALSE, mult="all", nomatch=NA, roll= TRUE, verbose=TRUE]
   DT_set.of.seconds[DT_tw_flows, list(Rate, meter), nomatch=0, roll= TRUE, keyby=date.time]
   
   DT_set.of.data <- rbind(DT_set.of.seconds,DT_subset_flows)
