@@ -26,15 +26,15 @@ dcast(DT_shower_meter, study + KEYCODE + logging ~ meter )[order(KEYCODE)]
 # find some temporary values for testing plotting function
 DT_shower_interval4[study == "Seattle" &
                       logging == 1 &
-                      KEYCODE == 13197, list(meter, nshower, START, END, VOLUME) ][order(START)]
+                      KEYCODE == 13197, list(meter, nshower, START, END, VOLUME, ncoincid) ][order(START)]
 
 # try this
 s='Seattle' 
 l=1 
 k=13197 
 DT=DT_shower_interval4 
-t1="1999-10-28 05:10:00"
-t2="1999-10-28 05:30:00"
+t1="1999-11-02 19:25:00"
+t2="1999-11-02 19:41:00"
 save.charts=FALSE
 
 
@@ -66,6 +66,10 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # add meter='total water'
   DT_tw_flows[,meter:='total water']
   
+  # check on duplicate interval data
+  DT_tw_flows[,list(n.intevals=length(StartTime)),by=StartTime][order(-n.intevals)]
+  # OK
+  
   # get the filename of the hot water interval data
   hw_file <- DT[study==s & KEYCODE==k & logging==l & meter=='hot water',list(tdw_file=unique(tdb_file))]
   
@@ -74,25 +78,33 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   
   # add meter='hot water'
   DT_hw_flows[,meter:='hot water']
+
+  # check on duplicate interval data
+  DT_hw_flows[,list(n.intevals=length(StartTime)),by=StartTime][order(-n.intevals)]
+  # OK
   
   # concatenate the flows data.tables
   DT_flows <- rbind(DT_tw_flows, DT_hw_flows)
   
   # interim clean up
-  rm(DT_tw_flows, DT_hw_flows)
+  # rm(DT_tw_flows, DT_hw_flows)
   
   # set timezone, all these Aquacraft sites are in the Pacific time zone
   tz="America/Los_Angeles"
   
   # convert StartTime to posix times
   DT_flows[,date.time:=ymd_hms(StartTime, tz=tz)]
+  DT_tw_flows[,date.time:=ymd_hms(StartTime, tz=tz)]
+  DT_hw_flows[,date.time:=ymd_hms(StartTime, tz=tz)]
   
   # get posix times from t1 & t2
   t_start = ymd_hms(t1, tz=tz)
   t_end   = ymd_hms(t2, tz=tz)
 
-  # get the total and hot water flows for the desired times
+  # restrict the total and hot water flows for the desired times
   DT_subset_flows <- DT_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
+  DT_tw_flows <- DT_tw_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
+  DT_hw_flows <- DT_hw_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
   
   
     
@@ -125,7 +137,15 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # str(DT_set.of.seconds )
   # str(DT_subset_flows )
 
-  # combine subset of flows with set.of.seconds
+  # combine subset of flows with DT_set.of.seconds
+  DT_tw_flows
+  str(DT_tw_flows)
+  
+  setkey(DT_set.of.seconds, date.time)
+  setkey(DT_tw_flows, date.time)
+  DT_set.of.seconds[DT_tw_flows, nomatch=NA, roll= TRUE]
+  DT_set.of.seconds[DT_tw_flows, list(Rate, meter), nomatch=0, roll= TRUE, keyby=date.time]
+  
   DT_set.of.data <- rbind(DT_set.of.seconds,DT_subset_flows)
   
   # str(DT_set.of.data)
