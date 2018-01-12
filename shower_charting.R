@@ -134,9 +134,13 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
 
   # recast DT_set.of.data so total water, hot water and zero 
   # are listed for each 10 second interval
-  dcast(DT_shower_meter, study + KEYCODE + logging ~ meter )[order(KEYCODE)]
-  DT_intervals <- dcast(DT_set.of.data, date.time ~ meter, value.var = "Rate")
-  summary
+  DT_intervals <- dcast(DT_set.of.data, date.time ~ meter, value.var = "Rate", 
+                        fun = sum, drop = TRUE)
+  summary(DT_intervals)
+  str(DT_intervals)
+  
+  # clean up the variable names
+  setnames(DT_intervals, old = c('hot water', 'total water'), new = c('hot.water', 'total.water'))
   
 # trying to draw 10 second rectangles whenever there is total water or hot water draw
 # if it's only hot water, draw a red rectangle   
@@ -147,36 +151,39 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # draw a red rectangle where hot water is greater than total water  
 
   # set min and max for hot water rectangles
-  DT_set.of.data[,hot_water.min:=0]
-  DT_set.of.data[,hot_water.max:=0]
-  DT_set.of.data[meter=='hot water',hot_water.max:=Rate]
-  
+  DT_intervals[,hot_water.min:=0]
+  DT_intervals[,hot_water.max:= hot.water]
+
   # set min and max for total water rectangles
-  DT_set.of.data[,total_water.min:=0]
-  DT_set.of.data[,total_water.max:=0]
-  DT_set.of.data[meter=='total water',total_water.max:=Rate]
+  DT_intervals[,total_water.min:=0]
+  DT_intervals[,total_water.max:=total.water]
+
+  # check if total.water and hot.water ever occur during the same interval
+  DT_intervals[total.water>0 & hot.water>0,list(date.time, total.water, hot.water)]
+  # Empty data.table (0 rows) of 3 cols: date.time,total.water,hot.water
+  # something's wrong
   
   # set up overlap rectangles
-  DT_set.of.data[,overlap.max:=pmin(hot_water.max,total_water.max)]
-  DT_set.of.data[,overlap.min:=0]
+  DT_intervals[,overlap.max:=pmin(hot_water.max,total_water.max)]
+  DT_intervals[,overlap.min:=0]
   
   # handle total_water when overlap
   # total_water.max > overlap.max, reset total_water.min 
-  DT_set.of.data[total_water.max > overlap.max, total_water.min:=overlap.max]
+  DT_intervals[total_water.max > overlap.max, total_water.min:=overlap.max]
   
   # total_water.max <= overlap.max, reset total_water.max 
-  DT_set.of.data[total_water.max <= overlap.max, total_water.max:=0]
+  DT_intervals[total_water.max <= overlap.max, total_water.max:=0]
   
   # handle hot_water when overlap
   # hot_water.max > overlap.max, reset hot_water.min 
-  DT_set.of.data[hot_water.max > overlap.max, hot_water.min:=overlap.max]
+  DT_intervals[hot_water.max > overlap.max, hot_water.min:=overlap.max]
   
   # hot_water.max <= overlap.max, reset hot_water.max 
-  DT_set.of.data[hot_water.max <= overlap.max, hot_water.max:=0]
+  DT_intervals[hot_water.max <= overlap.max, hot_water.max:=0]
   
   
   # make blank plot
-  p2 <- ggplot(data=DT_set.of.data ) 
+  p2 <- ggplot(data=DT_intervals ) 
   
   # set axis labels for hours
   p2 <- p2 + scale_x_datetime(limits = c(start, end), breaks = date_breaks(width=dbreaks), labels = date_format(dlabels))
