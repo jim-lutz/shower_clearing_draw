@@ -184,3 +184,26 @@ next steps?
     
 2018-01-12
     Also think about shower waste calculated from TraceWizard parameters to what see with charts.    
+   
+2018-01-16
+    think about aggregating showers to make sure we've got real, complete data
+    not to worry about time synch and tag ends of partial time intervals yet
+    goal is to make algorithm to calculate actual waste volume from shower time stream
+    don't even need to worry about hot, but helps people understand.
+    Latin hypercube of shower volume, duration, & ? to look at full range of sample shower datastreams
+    
+    for now redo shower_matching.R to consolidate individual showers in both hot & total
+    
+    For s='Seattle', l=2, k=13219 looks like hot is about 10 minutes behind total. Not all showers look like showers.
+    nshower total and hot don't correspond. 
+    2 problems, synchronize clocks total & hot
+    then harmonize shower count by numbering showers by start & end times
+    
+    could synchronize times by end time of shower? What about misidentified or extraneous events?
+    
+    
+    
+    
+    
+
+    

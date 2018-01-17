@@ -53,6 +53,9 @@ DT_shower_interval4 <-
 setkey(DT_shower_interval4, START)
 DT_shower_interval4[, nshower := seq_len(.N), by = c("study", "logging", "meter", "KEYCODE")]
 
+# save DT_shower_interval4
+save(DT_shower_interval4, file = paste0(wd_data,"DT_shower_interval4.RData"))
+
 # now see how many hot/total pairs
 DT_shower_meter <- DT_shower_interval4[, list(count=max(nshower)), by = c("study", "logging", "meter", "KEYCODE")][order(KEYCODE)]
 # they're close, but still not identical
@@ -61,13 +64,39 @@ DT_shower_meter <- DT_shower_interval4[, list(count=max(nshower)), by = c("study
 dcast(DT_shower_meter, study + logging + KEYCODE ~ meter )[order(KEYCODE)]
 
 # examine one case
-DT_shower_interval4[study == "Seattle" &
-                      logging == 2 &
-                      KEYCODE == 13219, list(meter, nshower, START, END, VOLUME) ][order(START)]
+DT_shower_interval4[study   == "Seattle" &
+                    logging == 2 &
+                    KEYCODE == 13219, 
+                    list(meter, nshower, START, END, VOLUME, ncoincid) ][order(START)]
 # probably going to have to make charts of interval data 
 # to see what's happening on these ones
 # seems like some of the hot water showers should be strung together
 # hot and total clocks off by ~10 minutes?
 
-# save DT_shower_interval4
-save(DT_shower_interval4, file = paste0(wd_data,"DT_shower_interval4.RData"))
+# look at this
+# try this
+s='Seattle' 
+l=2 
+k=13219 
+DT=DT_shower_interval4 
+t1="2000-03-25 09:06:00"
+t2="2000-03-25 09:21:00"
+save.charts=FALSE
+
+plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+# those don't look like showers
+
+t1="2000-03-25 19:55:00"
+t2="2000-03-25 20:15:00"
+
+plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+# those don't look like showers either
+
+t1="2000-03-28 11:40:00"
+t2="2000-03-28 12:05:00"
+
+plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+# this looks like it could be a shower, if hot is lagging 10 minutes.
+
+
+
