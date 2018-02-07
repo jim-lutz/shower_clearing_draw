@@ -203,7 +203,6 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # l = logging             - 1 | 2 | 3 , the phase of the study
   # k = KEYCODE             - 5 digit integer that identifies site
   # DT=DT_shower_interval4  - information about shower interval data
-  # DT=DT_siteID            - merged data from monitoring at siteID
   # t1                      - string ofYYYY-MM-DD hh:mm:ss for start of chart
   # t2                      - string ofYYYY-MM-DD hh:mm:ss for end of chart
   # save.charts             - logical to save charts

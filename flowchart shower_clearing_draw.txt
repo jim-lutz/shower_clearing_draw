@@ -57,6 +57,16 @@ shower_matching.R
     output: ./data/DT_shower_interval4.RData
  
         this output is mostly limited to showers with both hot and total water
+        script also calls plot_shower()
+        
+shower_synch.R
+    # script to synchronize hot water time to total water time using the ends of showers
+    # then possibly output synchronized interval data for showers with both total and hot 
+    # into data files by slk 
+    input:  ./data/DT_shower_interval4.RData
+        
+        
+        
 
 
        

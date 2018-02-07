@@ -201,7 +201,11 @@ next steps?
     
     could synchronize times by end time of shower? What about misidentified or extraneous events?
     
+2018-02-06
+    updated Rstudio
+    new script to compare ends of total and hot showers within a slk?
     
+    would also make sense to look at histogram of count of intervals by flow to identify waste & shower
     
     
     
