@@ -200,6 +200,7 @@ next steps?
     then harmonize shower count by numbering showers by start & end times
     
     could synchronize times by end time of shower? What about misidentified or extraneous events?
+    drop them. 
     
 2018-02-06
     updated Rstudio
@@ -207,7 +208,17 @@ next steps?
     
     would also make sense to look at histogram of count of intervals by flow to identify waste & shower
     
+2018-02-13
+    identify ends of showers, hot & total
+    use total as reference
+    for each end-of-shower in total find prev.end-of-hot and next.end-of-hot
+    find offset.prev.end-of-hot and offset.next.end-of-hot
+    look at which offsets have the tightest, highest cluster. that is how much to offset hot time
+    ones with offsets in cluster have a mate, showers w/o should be dropped
+    do this all within slk
     
+    
+        
     
 
     
