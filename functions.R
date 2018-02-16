@@ -399,3 +399,43 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   
   return(p2)
 }
+
+
+find.closest.hots <- function (n = nshower, DT_END=DT_1slk.END) {
+  # function to find the closest next and previous hot shower ENDs 
+  # to the END of one total shower for one slk
+  # DT_END  is a data.table of just meter and END for  one slk.
+  # n       is the total shower in question
+  
+  # for total showers
+  DT_total.END <- DT_END[meter == 'total water', list(total.START=START, total.END=END)]
+  # setkey
+  setkey(DT_total.END)
+  
+  # for hot showers
+  DT_hot.END <- DT_END[meter == 'hot water', list(hot.END=END)]
+  setkey(DT_hot.END)
+  
+  # find start of shower n in total water.
+  this.total.START = DT_total.END[n,]$total.START
+  
+  # find end of shower n in total water.
+  this.total.END = DT_total.END[n,]$total.END
+  
+  # find the next closest hot.END, could be NA
+  next.hot.END <- min(DT_hot.END[hot.END >= this.total.END]$hot.END)
+  
+  # find the prev closest hot.END, could be NA  
+  prev.hot.END <- max(DT_hot.END[hot.END < this.total.END]$hot.END)
+  
+  # make a 1 row data.table
+  DT_ENDs <- data.table(total.START      = this.total.START,
+                        total.END        = this.total.END,
+                        prev.hot.END     = prev.hot.END,
+                        next.hot.END     = next.hot.END
+  )
+  return(DT_ENDs)
+  
+}
+
+
