@@ -30,36 +30,41 @@ l=2
 k=13197 
 DT=DT_shower_interval4 
 
-# find offsets
-<- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4) {
-  # function to plot power and water flow for one siteID
   # s = study               - Seattle | EBMUD
   # l = logging             - 1 | 2 | 3 , the phase of the study
   # k = KEYCODE             - 5 digit integer that identifies site
   # DT=DT_shower_interval4  - information about shower interval data
   
-  # for each total shower END find the next and prev closest hot shower END
-  # DT1 just one slk.
-  DT1 <- DT[ study==s & logging == l & KEYCODE == k]
+# DT_1slk.END is a data.table of just meter and END for  one slk.
+DT_1slk.END <- DT[ study==s & logging == l & KEYCODE == k, list(meter, END)]
+
+# count of showers in total water
+nshowers <- nrow(DT_1slk.END[meter == 'total water'])
+
+# shower number in total 
+nshower = 2
+
+# variables to work with while building function
+DT_END=DT_1slk.END 
+n = nshower
+
+find.closest.hots <- function (n = nshower, DT_END=DT_1slk.END) {
+  # function to find the closest next and previous hot shower ENDs 
+  # to the END of one total shower for one slk
+  # DT_END  is a data.table of just meter and END for  one slk.
+  # n       is the total shower in question
   
-  # keep just the ends
   # for total showers
-  DT_total.END <- DT1[meter == 'total water', list(total.END=END)]
+  DT_total.END <- DT_END[meter == 'total water', list(total.END=END)]
   # setkey
   setkey(DT_total.END)
   
   # for hot showers
-  DT_hot.END <- DT1[meter == 'hot water', list(hot.END=END)]
+  DT_hot.END <- DT_END[meter == 'hot water', list(hot.END=END)]
   setkey(DT_hot.END)
   
-  # count of showers in total water
-  nshowers <- nrow(DT_total.END)
-  
-  # for each shower in DT_total.END find the prev and next shower in DT_hot.END
-  nshower = 2
-  
-  # find end of that shower in total water.
-  this.total.END = DT_total.END[nshower,]$total.END
+  # find end of shower n in total water.
+  this.total.END = DT_total.END[n,]$total.END
   
   # find the next closest hot.END, could be NA
   next.hot.END <- min(DT_hot.END[hot.END >= this.total.END]$hot.END)
@@ -67,9 +72,23 @@ DT=DT_shower_interval4
   # find the prev closest hot.END, could be NA  
   prev.hot.END <- max(DT_hot.END[hot.END < this.total.END]$hot.END)
   
-  # add to DT_total.END
-  DT_total.END[nshower, c("next.hot.END", "prev.hot.END") := list(next.hot.END, prev.hot.END)]
+  # make a 1 row data.table
+  DT_ENDs <- data.table(total.END        = this.total.END,
+                        prev.hot.END     = prev.hot.END,
+                        next.hot.END     = next.hot.END
+                        )
+  return(DT_ENDs)
   
+}
   
-  see plot_shower for ideas on how to retrieve data
+# test the find.closest.hots function
+DT_ENDs <- data.table(ldply(.data=1:nshowers, .fun =find.closest.hots, .progress= "text", .inform=TRUE))
+
+
+# plot some to see what's going on
+t1="2000-03-25 17:00:00"
+t2="2000-03-25 17:20:00"
+save.charts=FALSE
+
+plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
 

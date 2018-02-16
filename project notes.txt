@@ -217,7 +217,8 @@ next steps?
     ones with offsets in cluster have a mate, showers w/o should be dropped
     do this all within slk
     
-    
+2018-02-16
+    ask Bill DeOreo for REUWS1 & REUWSII shower interval data    
         
     
 
