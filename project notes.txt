@@ -218,7 +218,15 @@ next steps?
     do this all within slk
     
 2018-02-16
-    ask Bill DeOreo for REUWS1 & REUWSII shower interval data    
+    ask Bill DeOreo for REUWS1 & REUWSII shower interval data
+    
+    after looking at some charts, see about plotting only shower interval data
+    will require digging into interval data and subtracting coincident draws
+    slk 'Seattle', l=2, k=13197 seems to pretty well synchronized,
+    however it looks like it might be a pressure-balancing valve not a thermostatic valve
+    can only see clearing and showering signature in the hot
+
+        
         
     
 
