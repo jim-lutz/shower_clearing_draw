@@ -226,7 +226,15 @@ next steps?
     however it looks like it might be a pressure-balancing valve not a thermostatic valve
     can only see clearing and showering signature in the hot
 
-        
+2018-03-01
+    emailed Bill yesterday, no response yet
+    
+    think about collecting only shower interval data?
+    
+    Aquacraft data doesn't easily allow splitting interval data among coincident events.
+    possible to use start and end times of coinicident events to average shower data from the intervals before and after the event?
+    Look for showers with coincident events that occur early in the recording interval. The 'MDB File Viewer' (gmdb2) only show the first 1000 records.
+    Will have to do separately for total & hot?
         
     
 
