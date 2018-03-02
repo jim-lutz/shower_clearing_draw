@@ -236,6 +236,19 @@ next steps?
     Look for showers with coincident events that occur early in the recording interval. The 'MDB File Viewer' (gmdb2) only show the first 1000 records.
     Will have to do separately for total & hot?
         
+2018-03-02
+    for now just collect the shower interval data, 
+    keep number of coincident events, no need to that's already in the DT_ file
+    
+    Here's one with lot's of coincident draws to use later as a test case
+        s='Seattle' 
+        l=2 
+        k=13197 
+        t1="2000-03-26 18:21:00"
+        t2="2000-03-26 18:50:00"
+        plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+
+
     
 
     

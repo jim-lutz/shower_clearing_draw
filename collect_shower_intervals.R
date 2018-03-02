@@ -1,4 +1,4 @@
-# shower_collect_intervals.R
+# collect_shower_intervals.R
 # script to extract shower interval data and save to one .Rdata file for later processing
 # Jim Lutz "Thu Mar  1 09:20:29 2018"
 
@@ -66,7 +66,7 @@ DT=DT_shower_interval4
   # DT=DT_shower_interval4  - information about shower interval data
   
 # DT_1slk.END is a data.table of just meter START END for  one slk.
-DT_1slk.END <- DT[ study==s & logging == l & KEYCODE == k, list(meter, START, END)]
+DT_1slk.END <- DT[ study==s & logging == l & KEYCODE == k, list(meter, START, END, ncoincid)]
 
 # count of showers in total water
 nshowers <- nrow(DT_1slk.END[meter == 'total water'])
@@ -76,9 +76,15 @@ DT_ENDs <- data.table(ldply(.data=1:nshowers, .fun =find.closest.hots, .progress
 
 
 # plot some to see what's going on
-t1="2000-03-26 18:23:00"
-t2="2000-03-26 18:40:00"
+t1="2000-03-26 18:21:00"
+t2="2000-03-26 18:50:00"
 save.charts=FALSE
 
 plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+
+# that one looks like it has a lot of coincident draws
+# Aquacraft sees only 5 coincident draws same total & hot
+# also looks like this showerhead is single lever, temperature select only
+
+
 
