@@ -248,6 +248,8 @@ next steps?
         t2="2000-03-26 18:50:00"
         plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
 
+    got an ugly loop to identify shower intervals in one slkm.
+    sometimes duplicate records with same time in DT_tw_flows
 
     
 
