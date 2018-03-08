@@ -252,5 +252,10 @@ next steps?
     sometimes duplicate records with same time in DT_tw_flows
 
     
-
+2018-03-08
+    work on collecting shower interval data 
+    ideas on identifying clearing vs shower using plateaus in sorted by GPM?
+    id coincident draws using difference data? on 2-interval running averages?
+    
+    reduced time of loop to collect shower intervals by almost 50%
     
