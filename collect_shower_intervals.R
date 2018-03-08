@@ -15,21 +15,6 @@ source("functions.R")
 load(file = paste0(wd_data,"DT_shower_interval4.RData"))
 DT_shower_interval4
 
-# now see how many hot/total pairs
-DT_shower_meter <- DT_shower_interval4[, list(count=max(nshower)), by = c("study", "logging", "meter", "KEYCODE")][order(KEYCODE)]
-dcast(DT_shower_meter, study + logging + KEYCODE ~ meter )[order(KEYCODE)]
-
-# total number of showers
-nrow(DT_shower_interval4)
-# 2245
-# not too bad 
-2245*8*10
-# [1] 179600
-# should be ~ 200k records, actually it's
-DT_shower_interval4[,list(nrec = sum(DURATION)/10)]
-# nrec
-# 1: 99426
-
 # want to have the following fields
 # study logging meter KEYCODE  
 
@@ -84,55 +69,42 @@ identical(DT_flows, DT_flows2)
 
 # time the loop
 system.time({
-
-# loop through records one at a time, assume first record is not a shower
-for (i in 2:nrow(DT_flows)){
-  this_edge = DT_flows[i,edge]
-  prev_edge = DT_flows[i-1,edge]
-  prev_shower = DT_flows[i-1,shower]
-
-  if(prev_edge=='END') {
-    DT_flows[i, shower:=FALSE]
-    next()
-  }
-  if(this_edge=='NO') {
-    DT_flows[i, shower:=prev_shower]
-    next()
+  
+  # number of records to check
+  nrec = nrow(DT_flows)
+  
+  # instead of testing, change all subsequent records as appropriate
+  for (i in 1:nrec){ #  assume first record is not a shower
+    
+    # if START, change current and all subsequent records to TRUE
+    if(DT_flows[i,edge]=='START') {
+      DT_flows[i:nrec, shower:=TRUE]
+    } 
+    
+    # if END, change all subsequent records to FALSE
+    if(DT_flows[i,edge]=='END') {
+      DT_flows[(i+1):nrec, shower:=FALSE]
+    } 
+    
   }
   
-  if(this_edge=='START') {
-    DT_flows[i, shower:=TRUE]
-  }
-  
-  if(this_edge=='END') {
-    DT_flows[i, shower:=TRUE]
-  }
-  
-}
-
-})  
+})
 #   user  system elapsed 
-# 28.316   0.004  28.313 
-# that was slow!
+# 14.316   0.004  14.319 
 
-# see if it worked
-DT_flows
-DT_flows[shower==TRUE,]
-DT_flows[shower==TRUE,][1:100]
-DT_flows[edge!='NO']
 
-# sometimes duplicate records with same time in DT_tw_flows?
-# some StartTimes without any data?
 
 # time the loop
 system.time({
   
-# try a different strategy to see if it's any faster
+# number of records to check
 nrec = nrow(DT_flows2)
 
-# instead of testing, change all subsequent records as appropriate
-for (i in 1:nrec){ #  assume first record is not a shower
-
+# change all subsequent records as appropriate
+for (i in 1:nrec){
+  # if not edge, go to next record
+  if(DT_flows2[i,edge]=='NO') {next()}
+  
   # if START, change current and all subsequent records to TRUE
   if(DT_flows2[i,edge]=='START') {
     DT_flows2[i:nrec, shower:=TRUE]
@@ -146,21 +118,13 @@ for (i in 1:nrec){ #  assume first record is not a shower
 }
 
 })
-#   user  system elapsed 
-# 14.256   0.000  14.262 
+#  user  system elapsed 
+# 7.140   0.000   7.137 
 # better, but still slow
-
-# see if it worked
-DT_flows2
-DT_flows2[shower==TRUE,]
-DT_flows2[shower==TRUE,][1:100]
-DT_flows2[edge!='NO']
-# seems to have
 
 identical(DT_flows, DT_flows2)
 # [1] TRUE
 
-# how many sklm?
-DT_shower_interval4[!is.na(study), sklm:= paste(study,KEYCODE,logging,meter, sep = '_')]
-nrow(DT_shower_interval4[,list(unique(sklm))])
-# [1] 101
+# sometimes duplicate records with same time in DT_tw_flows?
+# some StartTimes without any data?
+
