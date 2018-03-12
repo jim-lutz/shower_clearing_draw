@@ -28,6 +28,8 @@ nrow(DT_shower_interval4[,list(unique(sklm))])
 # get shower_intervals for one slkm
 s='EBMUD'; k=22027; l=3; m='total water'
 
+# look for some interesting events.
+
 # get the .tdb filename
 fn_database = DT_shower_interval4[study   == s & 
                                   KEYCODE == k &
@@ -35,12 +37,8 @@ fn_database = DT_shower_interval4[study   == s &
                                   meter   == m, unique(tdb_file)]
 
 # get all the tables in fn_database
-
-# add single quotes to fn_database and db_table names
-fn_database <- paste0("'",fn_database,"'")
-
 # call mdb-tables, output to table.csv
-system2("mdb-tables", args = c('-1', fn_database), stdout = "table.csv")
+system2("mdb-tables", args = c('-1', paste0("'",fn_database,"'")), stdout = "table.csv")
 
 # load the output from the temporary file
 l_tables <- fread("table.csv", header = FALSE)[[1]]
@@ -51,5 +49,33 @@ unlink("table.csv")
 l_tables
   # [1] "Fixtures"        "Parameters"      "VirtualFixtures" "Events"         
   # [5] "Flows"           "EventFixtures"  
+
+# get all the datatables
+for(tb in l_tables) {
+  eval(
+    parse(text=
+        paste0('DT_', tb, ' <- get_table(fn_database, db_table = ',"'",tb,"')")
+    )
+  )
+}
+
+
+# load the Flow data as a data.table
+DT_Flows <- get_table(fn_database, db_table = 'Flows')
+
+names(DT_Flow)
+
+# find duplicate records with same time in DT_Flow
+DT_dup_Flow <- DT_Flow[duplicated(DT_Flow[,list(StartTime)]),][order(StartTime)]
+
+
+# look at something interesting
+t1="2002-06-01 11:58:00"
+t2="2002-06-01 17:10:00"
+save.charts=FALSE
+
+plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+
+
 
 
