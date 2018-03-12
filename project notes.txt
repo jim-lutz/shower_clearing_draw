@@ -259,3 +259,36 @@ next steps?
     
     reduced time of loop to collect shower intervals by almost 50%
     
+    Flows table has some records with same StartTime, different Rate, EventID and ID
+    ID seems to be sequential number of the record
+    what's EventID?
+    
+2018-03-12
+    interogate the .tdb files to figure out which intervals are showers.
+    ./shower_clearing_draw/data/Aquacraft/EBMUD/Post Retrofit 2/22027.tdb
+    contains the following tables:
+        Flows
+            ID
+            EventID
+            StartTime
+            Rate
+        EventFixtures
+            ID
+            IDEvent
+            IDFixture
+            Preserved
+        Events
+            ID
+            StartTime
+            EndTime
+            Duration
+            Class
+            Peak
+            Volume
+            Mode
+            ModeFreq
+        VirtualFixtures
+        Parameters
+        Fixtures
+        
+    

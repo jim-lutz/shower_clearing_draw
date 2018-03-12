@@ -49,14 +49,14 @@ collect_shower_intervals <- function(s, k, l, m, DT) {
   DT_Flow[,`:=`(study   = s,
                 KEYCODE = k,
                 logging = l,
-                meter   = m,
-                ID      = NULL,
-                EventID = NULL)
-              ]
+                meter   = m)
+                # ID      = NULL,
+                # EventID = NULL)
+          ]
   
   # drop records without any Rate data
   DT_Flow[is.na(Rate)]
-  # these should be dropped
+  # these should be dropped, haven't seen any
   
   # duplicate records with same time in DT_Flow?
   DT_dup_Flow <- DT_Flow[duplicated(DT_Flow[,list(StartTime)]),list(StartTime)][order(StartTime)]
