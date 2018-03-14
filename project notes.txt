@@ -288,7 +288,23 @@ next steps?
             Mode
             ModeFreq
         VirtualFixtures
+            
         Parameters
         Fixtures
-        
+     
+     USETYPE is only in the LOGGING DATA tables from 
+     /home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb
+     and
+     /home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/Aquacraft/Seattle/Seattle end use data.mdb
+     
+2018-03-13
+    use from Flows to figure out fixture       
+       
+    Flows$EventID = EventFixtures$IDEvent
+        EventFixtures$IDFixture = Fixtures$ID
+            Fixtures$Name == Shower
+    So with 2 merges, should be able to get Name into Flows
+    
+    
+    
     
