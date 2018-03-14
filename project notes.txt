@@ -312,6 +312,15 @@ next steps?
     
 2018-03-14
     make function to add Name to Flows for one sklm
-    then use it in collect_shower_intervals.R     
+    then use it in collect_shower_intervals.R 
+    
+    used decode_EventID.R to make function to Name Flows
+    tested on s='Seattle'; k=13431; l=1; m='total water'
+    none of the 3 random showers looked normal.
+    
+    
+    
+
+        
     
     
