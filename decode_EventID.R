@@ -38,15 +38,15 @@ DT_shower_interval4[study   == s &
                     KEYCODE == k &
                     logging == l & 
                     meter   == m, 
-                    list(ncoincid,START)][order(-ncoincid)]
-#    ncoincid               START
-# 1:        2 1999-10-30 13:12:14
-# 2:        1 1999-10-27 20:09:24
-# 3:        1 1999-10-28 18:52:54
-# 4:        1 1999-10-28 20:25:14
-# 5:        1 1999-11-04 14:49:44
-# 6:        1 1999-11-07 16:25:04
-# 7:        1 1999-11-08 12:56:04
+                    list(ncoincid,START, END, DURATION)][order(-ncoincid)]
+#    ncoincid               START                 END DURATION
+# 1:        2 1999-10-30 13:12:14 1999-10-30 13:19:24      430
+# 2:        1 1999-10-27 20:09:24 1999-10-27 20:20:14      650
+# 3:        1 1999-10-28 18:52:54 1999-10-28 18:57:24      270
+# 4:        1 1999-10-28 20:25:14 1999-10-28 20:30:44      330
+# 5:        1 1999-11-04 14:49:44 1999-11-04 14:51:24      100
+# 6:        1 1999-11-07 16:25:04 1999-11-07 16:30:54      350
+# 7:        1 1999-11-08 12:56:04 1999-11-08 12:59:04      180
 
 # get the .tdb filename
 fn_database = DT_shower_interval4[study   == s & 
@@ -168,91 +168,75 @@ nrow(DT_VirtualFixtures)
 DT_Fixtures[,list(ID, Name, VirtualFixtureID)]
 DT_VirtualFixtures[,list(ID, Name)]
 
-DT_Fixtures[,mvar:=VirtualFixtureID]
-setkey(DT_Fixtures,mvar)
-DT_VirtualFixtures[,mvar:=ID]
-setkey(DT_VirtualFixtures,mvar)
-
 tables()[NAME %in% c('DT_Fixtures','DT_VirtualFixtures')]
-merge(DT_Fixtures, DT_VirtualFixtures)[,list(mvar, Name.x, Name.y)]
-#     mvar          Name.x        Name.y
-#  1:    1        Toilet 1        Toilet
-#  2:    1        Toilet @        Toilet
-#  3:    2    Dishwasher 1    Dishwasher
-#  4:    2    Dishwasher @    Dishwasher
-#  5:    3 Clotheswasher 1 Clotheswasher
-#  6:    3 Clotheswasher 2 Clotheswasher
-#  7:    3 Clotheswasher @ Clotheswasher
-#  8:    4        Shower 1        Shower
-#  9:    5       Bathtub 1       Bathtub
-# 10:    8          Leak 1          Leak
-# 11:    9    Irrigation 1    Irrigation
-# 12:   10        Faucet 1        Faucet
-# 13:   11         UNKNOWN         Other
-# 14:   12         OUTDOOR    Humidifier
- 
+
+merge(DT_Fixtures, DT_VirtualFixtures, by.x = 'VirtualFixtureID', by.y = 'ID')[,list( Name.x, Name.y)]
+#              Name.x        Name.y
+#  1:        Toilet 1        Toilet
+#  2:        Toilet @        Toilet
+#  3:    Dishwasher 1    Dishwasher
+#  4:    Dishwasher @    Dishwasher
+#  5: Clotheswasher 1 Clotheswasher
+#  6: Clotheswasher 2 Clotheswasher
+#  7: Clotheswasher @ Clotheswasher
+#  8:        Shower 1        Shower
+#  9:       Bathtub 1       Bathtub
+# 10:          Leak 1          Leak
+# 11:    Irrigation 1    Irrigation
+# 12:        Faucet 1        Faucet
+# 13:         UNKNOWN         Other
+# 14:         OUTDOOR    Humidifier 
 # seems like VirtualFixtures is more generic
 # @ is per load? 
 # since 'Shower 1' and 'Shower' are the same, 
 # probably don't have to go all the way to VirtualFixtures
 
-# DT_Flows$
+# merge Name from Fixtures into EventFixtures
+DT_EventFixtures <- merge(DT_EventFixtures,DT_Fixtures[,list(ID,Name)], by.x = 'IDFixture', by.y = 'ID')
 
+# drop IDFixture
+DT_EventFixtures[,IDFixture:=NULL]
 
+# merge Name from DT_EventFixtures into Flows
+DT_Flows <- merge(DT_Flows, DT_EventFixtures[,list(IDEvent,Name)], by.x = 'EventID', by.y = 'IDEvent' )
 
+# find shower intervals in Flows
+DT_Flows[grep('Shower',Name),]
+DT_Flows[grep('Shower',Name),list(dur=length(ID)/6),by=EventID][order(-dur)]
+# lot of short showers here
 
+DT_Flows[EventID==1084,]
 
+#    ncoincid               START                 END DURATION
+# 1:        2 1999-10-30 13:12:14 1999-10-30 13:19:24      430
+# 2:        1 1999-10-27 20:09:24 1999-10-27 20:20:14      650
+# 3:        1 1999-10-28 18:52:54 1999-10-28 18:57:24      270
+# 4:        1 1999-10-28 20:25:14 1999-10-28 20:30:44      330
+# 5:        1 1999-11-04 14:49:44 1999-11-04 14:51:24      100
+# 6:        1 1999-11-07 16:25:04 1999-11-07 16:30:54      350
+# 7:        1 1999-11-08 12:56:04 1999-11-08 12:59:04      180
 
-
-DT_Fixtures[grep('Shower',Name),list(ID,VirtualFixtureID) ]
-#    ID VirtualFixtureID
-# 1:  7                4
-
-names(DT_EventFixtures)
-# [1] "ID"        "IDEvent"   "IDFixture" "Preserved"
-
-DT_EventFixtures[,list(n=length(ID)),by=IDFixture][order(IDFixture)]
-#     IDFixture    n
-#  1:         2 1273
-#  2:         3  335
-#  3:         5   35
-#  4:         6   53
-#  5:         7   60
-#  6:         9 1213
-#  7:        10   40
-#  8:        12   37
-#  9:        13    4
-# 10:        14   28
-# 11:        16    2
-
-DT_Flows
-# 19838
-
-# find duplicate records with same time in DT_Flow
-DT_dup_Flow <- DT_Flows[duplicated(DT_Flows[,list(StartTime)]),][order(StartTime)]
-# 675
-
-# Look for something in the middle of the recording window
-DT_dup_Flow[300:340,]
-
-DT_Flows[EventID==115,]
-
-
-# look at to see what's happening
-t1="1999-11-03 11:25:00"
-t2="1999-11-03 11:30:00"
-
+# look to see what's happening
+t1="1999-10-30 13:12:14"
+t2="1999-10-30 13:19:24"
 
 DT_Flows[ t1 <= StartTime & StartTime <= t2,][order(StartTime,EventID)]
-
-DT_shower_interval4[study   == s & 
-                      KEYCODE == k &
-                      logging == l & 
-                      meter   == m &
-                      t1 <= START & START <= t2, ]
-
 plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+# not your typical shower
 
+# look to see what's happening
+t1="1999-10-27 20:09:24"
+t2="1999-10-27 20:20:14"
 
+DT_Flows[ t1 <= StartTime & StartTime <= t2,][order(StartTime,EventID)]
+plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+# at least the toilet is visible. What's happening at 20:16:30?
+
+# look to see what's happening
+t1="1999-10-28 18:52:00"
+t2="1999-10-28 18:58:00"
+
+DT_Flows[ t1 <= StartTime & StartTime <= t2,][order(StartTime,EventID)]
+plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
 
 

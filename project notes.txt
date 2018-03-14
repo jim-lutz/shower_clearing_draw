@@ -305,6 +305,11 @@ next steps?
             Fixtures$Name == Shower
     So with 2 merges, should be able to get Name into Flows
     
+    try it in on one sklm
+    Got it to work. Plots seem plausible, but will be hard to split clearing/showering
+    Plot to show only shower or coincident draws diff color?
+    Next make function and apply to all showers
+    
     
     
     
