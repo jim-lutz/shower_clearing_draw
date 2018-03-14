@@ -310,6 +310,8 @@ next steps?
     Plot to show only shower or coincident draws diff color?
     Next make function and apply to all showers
     
-    
+2018-03-14
+    make function to add Name to Flows for one sklm
+    then use it in collect_shower_intervals.R     
     
     

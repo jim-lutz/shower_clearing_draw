@@ -1,6 +1,6 @@
 # decode_EventID.R
-# script to help decode EventID in Flows data
-# Jim Lutz "Tue Mar 13 16:27:54 2018"
+# script to develop function to add Name to Flows
+# Jim Lutz "Wed Mar 14 15:03:01 2018"
 
 # set packages & etc
 source("setup.R")
@@ -25,7 +25,7 @@ DT_shower_interval4[ , sklm:= paste(study,KEYCODE,logging,meter, sep = '_')]
 nrow(DT_shower_interval4[,list(unique(sklm))])
 # [1] 101
 
-# find a shower with a few coincidents
+# find a sklm having showers with a few coincidents
 DT_shower_interval4[,list(nshower=length(USETYPE), ncoin=sum(ncoincid)),by=sklm][order(-nshower,-ncoin)][1:30]
 # Seattle_13431_1_total water
 
@@ -68,8 +68,8 @@ l_tables
   # [1] "Fixtures"        "Parameters"      "VirtualFixtures" "Events"         
   # [5] "Flows"           "EventFixtures"  
 
-# get all the datatables, this is rather ugly but appears to work
-for(tb in l_tables) {
+# get only Fixtures, EventFixtures, and Flows as datatables, this is rather ugly but appears to work
+for(tb in c('Fixtures', 'EventFixtures', 'Flows')) {
   eval(
     parse(text=
         paste0('DT_', tb, ' <- get_table(fn_database, db_table = ',"'",tb,"')")
@@ -78,118 +78,8 @@ for(tb in l_tables) {
 }
 
 tables()$NAME
-# [1] "DT_EventFixtures"    "DT_Events"           "DT_Fixtures"        
-# [4] "DT_Flows"            "DT_Parameters"       "DT_shower_interval4"
-# [7] "DT_VirtualFixtures" 
-
-tables()[,NAME]
-
-# look at Flows
-names(DT_Flows)
-# [1] "ID"        "EventID"   "StartTime" "Rate" 
-summary(DT_Flows$EventID)
-# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#    1     759    1578    1573    2421    3080
-
-# look at Events
-names(DT_Events)
-# [1] "ID"        "StartTime" "EndTime"   "Duration"  "Class"     "Peak"      "Volume"   
-# [8] "Mode"      "ModeFreq" 
-nrow(DT_Events)
-# [1] 3080
-# same number of Events as number of EventID in Flows
-
-# look at EventFixtures
-names(DT_EventFixtures)
-# [1] "ID"        "IDEvent"   "IDFixture" "Preserved"
-length(DT_EventFixtures$IDEvent)
-# [1] 3080
-# same as EventID in Flows
-# every IDEvent has an IDFixture
-# how many IDFixtures
-DT_EventFixtures[, list(nrecs = length(ID)), by=IDFixture][order(IDFixture)]
- #     IDFixture nrecs
- #  1:         2  1273
- #  2:         3   335
- #  3:         5    35
- #  4:         6    53
- #  5:         7    60
- #  6:         9  1213
- #  7:        10    40
- #  8:        12    37
- #  9:        13     4
- # 10:        14    28
- # 11:        16     2
-# what about Preserved
-DT_EventFixtures[, list(nrecs = length(ID)), by=Preserved][order(Preserved)]
-#    Preserved nrecs
-# 1:         0  2784
-# 2:         1   296
-# what's Preserved
-DT_EventFixtures[Preserved==1, 
-                 list(nrecs = length(ID)), 
-                 by=IDFixture][order(IDFixture)]
-#    IDFixture nrecs
-# 1:         3    24
-# 2:         5    15
-# 3:         6     7
-# 4:         7    21
-# 5:         9   122
-# 6:        10    40
-# 7:        12    37
-# 8:        14    28
-# 9:        16     2
-
-identical(DT_EventFixtures$ID,DT_EventFixtures$IDEvent)
-# [1] TRUE
-
-
-# now see about Fixtures
-names(DT_Fixtures)
-# [1] "ID"               "VirtualFixtureID" "Order"            "Name"            
-# [5] "MinVol"           "MaxVol"           "MinPeak"          "MaxPeak"         
-# [9] "MinDur"           "MaxDur"           "MinMode"          "MaxMode"         
-# [13] "MinModeFreq"      "MaxModeFreq"     
-DT_Fixtures
-# this looks like mostly parameters to determine what type of event it is
-# What about VirtualFixtureID?
-# More ID in Fixtures than IDFixture in EventFixtures
-nrow(DT_Fixtures)
-# [1] 14
-
-names(DT_VirtualFixtures)
-[1] "ID"          "Order"       "Name"        "MinVol"      "MaxVol"      "MinPeak"    
-[7] "MaxPeak"     "MinDur"      "MaxDur"      "MinMode"     "MaxMode"     "MinModeFreq"
-[13] "MaxModeFreq"
-DT_VirtualFixtures
-nrow(DT_VirtualFixtures)
-# [1] 13
-
-DT_Fixtures[,list(ID, Name, VirtualFixtureID)]
-DT_VirtualFixtures[,list(ID, Name)]
-
-tables()[NAME %in% c('DT_Fixtures','DT_VirtualFixtures')]
-
-merge(DT_Fixtures, DT_VirtualFixtures, by.x = 'VirtualFixtureID', by.y = 'ID')[,list( Name.x, Name.y)]
-#              Name.x        Name.y
-#  1:        Toilet 1        Toilet
-#  2:        Toilet @        Toilet
-#  3:    Dishwasher 1    Dishwasher
-#  4:    Dishwasher @    Dishwasher
-#  5: Clotheswasher 1 Clotheswasher
-#  6: Clotheswasher 2 Clotheswasher
-#  7: Clotheswasher @ Clotheswasher
-#  8:        Shower 1        Shower
-#  9:       Bathtub 1       Bathtub
-# 10:          Leak 1          Leak
-# 11:    Irrigation 1    Irrigation
-# 12:        Faucet 1        Faucet
-# 13:         UNKNOWN         Other
-# 14:         OUTDOOR    Humidifier 
-# seems like VirtualFixtures is more generic
-# @ is per load? 
-# since 'Shower 1' and 'Shower' are the same, 
-# probably don't have to go all the way to VirtualFixtures
+# [1] "DT_EventFixtures"    "DT_Fixtures"         "DT_Flows"           
+# [4] "DT_shower_interval4"
 
 # merge Name from Fixtures into EventFixtures
 DT_EventFixtures <- merge(DT_EventFixtures,DT_Fixtures[,list(ID,Name)], by.x = 'IDFixture', by.y = 'ID')
@@ -202,8 +92,29 @@ DT_Flows <- merge(DT_Flows, DT_EventFixtures[,list(IDEvent,Name)], by.x = 'Event
 
 # find shower intervals in Flows
 DT_Flows[grep('Shower',Name),]
+# 1687 shower intervals
+
 DT_Flows[grep('Shower',Name),list(dur=length(ID)/6),by=EventID][order(-dur)]
-# lot of short showers here
+# 60 showers, lot of short ones here
+
+# number of EventID by Name
+DT_Flows[, list(nevents = length(unique(EventID)),
+                nrec    = length(ID)
+                ), 
+         by=Name][order(-nevents)]
+  #               Name nevents nrec
+  # 1:          Leak 1    1273 8778
+  # 2:        Faucet 1    1213 5109
+  # 3:        Toilet 1     335 1743
+  # 4:        Shower 1      60 1687
+  # 5: Clotheswasher 2      53  156
+  # 6:       Bathtub 1      40  843
+  # 7:        Toilet @      37  287
+  # 8: Clotheswasher 1      35  624
+  # 9: Clotheswasher @      28  598
+  # 10:         UNKNOWN       4    5
+  # 11:         OUTDOOR       2    8
+
 
 DT_Flows[EventID==1084,]
 
