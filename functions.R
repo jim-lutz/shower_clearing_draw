@@ -439,3 +439,41 @@ find.closest.hots <- function (n = nshower, DT_END=DT_1slk.END) {
 }
 
 
+get.Names <- function (s=study, l=logging, k=KEYCODE, m=meter, DT=DT_shower_interval4){
+  # function to get Flows from one sklm.tdb
+  # add Name to each interval then
+  # return it as a data.table
+  # s = study               - Seattle | EBMUD
+  # l = logging             - 1 | 2 | 3 , the phase of the study
+  # k = KEYCODE             - 5 digit integer that identifies site
+  # m = meter               - hot water | total water
+  # DT=DT_shower_interval4  - information about shower interval data
+  
+  # get the .tdb filename
+  fn_database = DT_shower_interval4[study   == s & 
+                                      KEYCODE == k &
+                                      logging == l & 
+                                      meter   == m, unique(tdb_file)]
+  
+  # get only Fixtures, EventFixtures, and Flows as datatables, this is rather ugly but appears to work
+  for(tb in c('Fixtures', 'EventFixtures', 'Flows')) {
+    eval(
+      parse(text=
+              paste0('DT_', tb, ' <- get_table(fn_database, db_table = ',"'",tb,"')")
+      )
+    )
+  }
+  
+  # merge Name from Fixtures into EventFixtures
+  DT_EventFixtures <- merge(DT_EventFixtures,DT_Fixtures[,list(ID,Name)], by.x = 'IDFixture', by.y = 'ID')
+  
+  # drop IDFixture
+  DT_EventFixtures[,IDFixture:=NULL]
+  
+  # merge Name from DT_EventFixtures into Flows
+  DT_Flows <- merge(DT_Flows, DT_EventFixtures[,list(IDEvent,Name)], by.x = 'EventID', by.y = 'IDEvent' )
+  
+  # return the modified Flows data.table
+  return(DT_Flows)
+}
+

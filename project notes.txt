@@ -317,9 +317,13 @@ next steps?
     used decode_EventID.R to make function to Name Flows
     tested on s='Seattle'; k=13431; l=1; m='total water'
     none of the 3 random showers looked normal.
-    
-    
-    
+
+2018-03-15
+    new version of R
+        got latest version R-3.4.4.tar.gz from https://cran.r-project.org/sources.html   
+        untar the R source code, tar -xvf R-3.4.4.tar.gz
+        https://cran.r-project.org/doc/FAQ/R-FAQ.html#How-can-R-be-installed-_0028Unix_002dlike_0029
+    https://support.rstudio.com/hc/en-us/articles/218004217-Building-R-from-source
 
         
     
