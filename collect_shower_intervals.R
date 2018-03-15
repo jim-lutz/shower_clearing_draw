@@ -26,41 +26,48 @@ nrow(DT_shower_interval4[,list(unique(sklm))])
 # [1] 101
 
 # make a list of sklm's
-l_sklm <- DT_shower_interval4[,list(sklm=unique(sklm))][order(sklm)][[1]]
+l_sklm <- unique(DT_shower_interval4[,sklm])
 
 # get shower_intervals for one slkm
 l_sklm[27]
 
+# make a data.table of all the shower interval data
+DT_shower_Flows <- data.table(ldply(.data=l_sklm[22:24],
+                                       .fun =collect.showers, DT_shower_interval4,
+                                       .progress= "text", 
+                                       .inform=TRUE))
 
-collect.showers <- function(this_sklm, DT=DT_shower_interval4) {
-  # collects shower Flows data for one sklm
-  # sklm  = string consisting of study_logging_KEYCODE_meter
-  # DT    = data.table DT_shower_interval4 with sklm field already added
-  
-  # recover the sklm's, there's got to be a more elegant way to do this
-  DT_sklm <- DT_shower_interval4[sklm==l_sklm[27]][1,list(study,logging,KEYCODE,meter)]
-  s = DT_sklm$study
-  l = DT_sklm$logging
-  k = DT_sklm$KEYCODE
-  m = DT_sklm$meter
-  
-  # get the Flows as a data.table with Name field added
-  DT_Flows <- get.Names(s, l, k, m, DT)
-  
-  # add identifying fields to every record
-  DT_Flows[,`:=`(study   = s,
-                 KEYCODE = k,
-                 logging = l,
-                 meter   = m)
-           ]
-  
-  # keep only shower records 
-  DT_shower_Flows <- DT_Flows[grep('Shower',Name),]
-  
-  # return the shower Flows data.table
-  return(DT_shower_Flows)
-  
-}
+# check if it worked
+l_sklm[22:24]
+# [1] "Seattle_13266_2_hot water"   "Seattle_13197_2_total water"
+# [3] "Seattle_13197_2_hot water"  
 
-# test the collect.showers function
-DT_shower_Flows <- collect.showers(l_sklm[27],DT_shower_interval4)
+# study?
+DT_shower_Flows[,list(nrec=length(ID)),by=study]
+#      study nrec
+# 1: Seattle 4029
+
+# logging?
+DT_shower_Flows[,list(nrec=length(ID)),by=logging]
+#    logging nrec
+# 1: Seattle 4744
+
+# KEYCODE?
+DT_shower_Flows[,list(nrec=length(ID)),by=KEYCODE]
+#    KEYCODE nrec
+# 1:   13266 1214
+# 2:   13197 3530
+
+# meter
+DT_shower_Flows[,list(nrec=length(ID)),by=meter]
+#          meter nrec
+# 1:   hot water 2913
+# 2: total water 1831
+
+# number of showers
+DT_shower_Flows[,list(nshowers=length(unique(EventID))),
+                by=c("study","logging","KEYCODE","meter")]
+#      study logging KEYCODE       meter nshowers
+# 1: Seattle       2   13266   hot water       25
+# 2: Seattle       2   13197 total water       30
+# 3: Seattle       2   13197   hot water       29

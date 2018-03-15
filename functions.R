@@ -477,3 +477,34 @@ get.Names <- function (s=study, l=logging, k=KEYCODE, m=meter, DT=DT_shower_inte
   return(DT_Flows)
 }
 
+
+collect.showers <- function(this_sklm, DT=DT_shower_interval4) {
+  # collects shower Flows data for one sklm
+  # sklm  = string consisting of study_logging_KEYCODE_meter
+  # DT    = data.table DT_shower_interval4 with sklm field already added
+  
+  # recover the sklm's, there's got to be a more elegant way to do this
+  DT_sklm <- DT_shower_interval4[sklm==this_sklm][1,list(study,logging,KEYCODE,meter)]
+  s = DT_sklm$study
+  l = DT_sklm$logging
+  k = DT_sklm$KEYCODE
+  m = DT_sklm$meter
+  
+  # get the Flows as a data.table with Name field added
+  DT_Flows <- get.Names(s, l, k, m, DT)
+  
+  # add identifying fields to every record
+  DT_Flows[,`:=`(study   = s,
+                 KEYCODE = k,
+                 logging = l,
+                 meter   = m)
+           ]
+  
+  # keep only shower records 
+  DT_shower_Flows <- DT_Flows[grep('Shower',Name),]
+  
+  # return the shower Flows data.table
+  return(DT_shower_Flows)
+  
+}
+
