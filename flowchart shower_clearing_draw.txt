@@ -65,7 +65,16 @@ shower_synch.R
     # into data files by slk 
     input:  ./data/DT_shower_interval4.RData
         
-        
+decode_EventID.R
+    # script to develop function to add Name to Flows
+    input:  ./data/DT_shower_interval4.RData
+            ./data/Aquacraft/*/*/*.tdb   
+
+collect_shower_intervals.R
+    # script to extract all shower interval data and save to one .Rdata file for later processing
+    input:  ./data/DT_shower_interval4.RData
+            ./data/Aquacraft/*/*/*.tdb   
+    output: ./data/DT_shower_Flows.RData        
         
 
 
