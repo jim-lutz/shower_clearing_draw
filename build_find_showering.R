@@ -47,9 +47,14 @@ DT_1shower[,date.time:=ymd_hms(StartTime, tz=tz)]
 # initial time
 start.time <- DT_1shower$date.time[1]
 
-# seconds since start of shower
+# duration, in seconds since start of shower
 DT_1shower[, dsec:=as.numeric(as.duration(interval(start.time, date.time)))]
 
-# reversed running average of rates starting from 3rd to last?
-DT_1shower[35:30,list(dsec,Rate)]
+# drop times now
+DT_1shower[, `:=`(StartTime = NULL,
+                  date.time = NULL)
+           ]
 
+# calculate Y, test case i==4, that's probably best for this shower
+DT_1shower[1:4, Y4:= mean(Rate[1:4])]
+DT_1shower[5:.N, Y4:= mean(Rate[4:.N])]

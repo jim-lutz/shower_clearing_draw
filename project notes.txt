@@ -342,7 +342,13 @@ next steps?
     
     try incremental reverse flow average and variance to see if end of clearing draw shows up
     look at shift()? to make a matrix?
+    nah
     
+    try this
+    test to find best fit of Y = Y1 ave(y) for t<= t1 & Y2 for t > t1
+    then showering duration  is tn-t1 and showering rate is Y2
+    
+     
     
     
     
