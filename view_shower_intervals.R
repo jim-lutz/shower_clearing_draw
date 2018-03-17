@@ -29,25 +29,37 @@ bracket <- DT_shower_Flows[study==s & KEYCODE==k & logging==l,
 
 # find how many coincident shower events for that skl
 DT_shower_Flows[study==s & KEYCODE==k & logging==l, 
-                list(nEventID = length(unique(EventID)),
-                     mtr      = unique(meter)), 
-                by=EventID][order(EventID)] 
-# overlapping showers?
+                list(nrec     = length(StartTime),
+                     mtr      = unique(meter),
+                     start    = min(StartTime),
+                     end      = max(StartTime)
+                     ), 
+                by=EventID][order(start)][1:20] 
+# some really short and some really long showers?
 
 # look to see what's happening
-t1="1999-10-31 09:13:00"
-t2="1999-10-31 09:25:00"
+t1="1999-10-27 17:40:00"
+t2="1999-10-27 17:47:00"
+
+DT_shower_Flows[study==s & KEYCODE==k & logging==l & 
+                t1 <= StartTime & StartTime <= t2,] [order(StartTime,EventID)]
+
+plot_shower(s, l, k, DT=DT_shower_interval4, t1, t2,)
+# it's a clean looking shower.
+# will have to find a messy one for comparison later
 
 
 
-
-plot_shower_only <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4, 
+plot_shower_only <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_Flows, 
                          t1, t2, save.charts=FALSE) {
+# for constructing function only
+DT=DT_shower_Flows # remove when done
   # function to plot total and hot water flow for one slk
+  # only for showers
   # s = study               - Seattle | EBMUD
   # l = logging             - 1 | 2 | 3 , the phase of the study
   # k = KEYCODE             - 5 digit integer that identifies site
-  # DT=DT_shower_interval4  - information about shower interval data
+  # DT=DT_shower_Flows      - information about shower interval data
   # t1                      - string ofYYYY-MM-DD hh:mm:ss for start of chart
   # t2                      - string ofYYYY-MM-DD hh:mm:ss for end of chart
   # save.charts             - logical to save charts
@@ -55,32 +67,15 @@ plot_shower_only <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interv
   # wd_charts = work directory for charts
   # plotting function originally from /home/jiml/HotWaterResearch/projects/CECHWT24/scripts/functions.R
   
-  # get the filename of the total water interval data
-  tw_file <- DT[study==s & KEYCODE==k & logging==l & meter=='total water',list(tdw_file=unique(tdb_file))]
+  # restrict data to only the desired slk
+  DT <- DT[study==s & KEYCODE==k & logging==l,]
   
-  # load the total water Flow data as a data.table
-  DT_tw_flows <- get_table(fn_database = tw_file, db_table = 'Flows')
+  # get the total water Flow data 
+  DT_tw_flows <- DT[meter=='total water']
   
-  # add meter='total water'
-  DT_tw_flows[,meter:='total water']
-  
-  # check on duplicate interval data
-  DT_tw_flows[,list(n.intevals=length(StartTime)),by=StartTime][order(-n.intevals)]
-  # OK
-  
-  # get the filename of the hot water interval data
-  hw_file <- DT[study==s & KEYCODE==k & logging==l & meter=='hot water',list(tdw_file=unique(tdb_file))]
-  
-  # load the total water Flow data as a data.table
-  DT_hw_flows <- get_table(fn_database = hw_file, db_table = 'Flows')
-  
-  # add meter='hot water'
-  DT_hw_flows[,meter:='hot water']
-  
-  # check on duplicate interval data
-  DT_hw_flows[,list(n.intevals=length(StartTime)),by=StartTime][order(-n.intevals)]
-  # OK
-  
+  # get the hot water Flow data 
+  DT_hw_flows <- DT[meter=='hot water']
+
   # set timezone, all these Aquacraft sites are in the Pacific time zone
   tz="America/Los_Angeles"
   

@@ -328,6 +328,7 @@ next steps?
     
     collected Aquacraft's shower Flows data to ./data/DT_shower_Flows.RData
    
-        
+2018-03-16
+    build a new function to chart just the shower intervals.        
     
     
