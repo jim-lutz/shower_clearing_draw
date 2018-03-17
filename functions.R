@@ -196,6 +196,41 @@ get.tdb.info <- function(this_tdb) {
 }
 
 
+dspan <- function(t_start, t_end) {
+  # function to generate dbreaks, dlabels, and xlabel for ggplotting time data
+  # configure breaks and labels appropriately for span from t_start and t_end
+  # looking for approx 8 - 12 breaks across span of x-axis
+  # as t_start and t_end posix times
+  
+  
+  # calculate span in minutes
+  span = as.numeric(as.duration(interval(t_start, t_end)))/60 # minutes
+  
+  # pick appropriate breaks and labels from size of span
+  if(span>0)             {dbreaks = "1 min";         dlabels = "%H:%M" ; xlabel="time"}
+  if(span>10)            {dbreaks = "2 mins";        dlabels = "%H:%M" }
+  if(span>30)            {dbreaks = "5 mins";        dlabels = "%H:%M" }
+  if(span>60)            {dbreaks = "20 mins";       dlabels = "%H:%M" }
+  if(span>180)           {dbreaks = "30 mins";       dlabels = "%H:%M" }
+  if(span>360)           {dbreaks = "60 mins";       dlabels = "%H:%M" }
+  if(span>720)           {dbreaks = "2 hours";       dlabels = "%H:%M" }
+  if(span>(24*60))       {dbreaks = "3 hours";       dlabels = "%H:%M" }    # 1 day
+  if(span>(3*24*60))     {dbreaks = "12 hours";      dlabels = "%e %Hh"; xlabel="date" } # 3 days
+  if(span>(7*24*60))     {dbreaks = "1 day";         dlabels = "%e"  }      # 1 week
+  if(span>(14*24*60))    {dbreaks = "1 day";         dlabels = "%b-%d" }    # 2 weeks
+  if(span>(30*24*60))    {dbreaks = "3 days";        dlabels = "%b-%d" }    # 1 month
+  if(span>(90*24*60))    {dbreaks = "1 week";        dlabels = "%b-%d" }    # 3 months
+  if(span>(120*24*60))   {dbreaks = "2 weeks";       dlabels = "%b-%d" }    # 6 months
+  if(span>(365*24*60))   {dbreaks = "2 months";      dlabels = "%b" }       # 1 year
+  if(span>(2*365*24*60)) {dbreaks = "4 months";      dlabels = "%b %y" }    # 2 years
+  
+  # build list containing dbreaks, dlabels, xlabel to return from function    
+  span <- list(dbreaks = dbreaks, dlabels = dlabels, xlabel = xlabel)
+  
+  return(span)
+}
+
+
 plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4, 
                          t1, t2, save.charts=FALSE) {
   # function to plot total and hot water flow for one slk
@@ -250,8 +285,6 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # restrict the total water and hot water flows for the desired times
   DT_tw_flows <- DT_tw_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
   DT_hw_flows <- DT_hw_flows[date.time>=t_start & date.time<=t_end, list(Rate,meter),by="date.time"]  
-  
-  
   
   # make a data.table of a set of seconds with 0 as value.
   DT_set.of.seconds <- data.table(date.time=seq(from=t_start, to=t_end, by=dseconds(1) ), Rate=0, meter='zero' )
@@ -330,53 +363,46 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   # hot_water.max <= overlap.max, reset hot_water.max 
   DT_intervals[hot_water.max <= overlap.max, hot_water.max:=0]
   
-  # turn this into a separate function later
-  # configure breaks and labels appropriately for t1 & t2
-  # calculates span in minutes
-  span = as.numeric(as.duration(interval(t_start, t_end)))/60 # minutes
-  # breaks = date_breaks("2 hours"), labels = date_format("%H:%M")
-  # looking for approx 8 - 12 breaks across span
-  if(span>0)             {dbreaks = "1 min";         dlabels = "%H:%M" ; xlabel="time"}
-  if(span>10)            {dbreaks = "2 mins";        dlabels = "%H:%M" }
-  if(span>30)            {dbreaks = "5 mins";        dlabels = "%H:%M" }
-  if(span>60)            {dbreaks = "20 mins";       dlabels = "%H:%M" }
-  if(span>180)           {dbreaks = "30 mins";       dlabels = "%H:%M" }
-  if(span>360)           {dbreaks = "60 mins";       dlabels = "%H:%M" }
-  if(span>720)           {dbreaks = "2 hours";       dlabels = "%H:%M" }
-  if(span>(24*60))       {dbreaks = "3 hours";       dlabels = "%H:%M" }    # 1 day
-  if(span>(3*24*60))     {dbreaks = "12 hours";      dlabels = "%e %Hh"; xlabel="date" } # 3 days
-  if(span>(7*24*60))     {dbreaks = "1 day";         dlabels = "%e"  }      # 1 week
-  if(span>(14*24*60))    {dbreaks = "1 day";         dlabels = "%b-%d" }    # 2 weeks
-  if(span>(30*24*60))    {dbreaks = "3 days";        dlabels = "%b-%d" }    # 1 month
-  if(span>(90*24*60))    {dbreaks = "1 week";        dlabels = "%b-%d" }    # 3 months
-  if(span>(120*24*60))   {dbreaks = "2 weeks";       dlabels = "%b-%d" }    # 6 months
-  if(span>(365*24*60))   {dbreaks = "2 months";      dlabels = "%b" }       # 1 year
-  if(span>(2*365*24*60)) {dbreaks = "4 months";      dlabels = "%b %y" }    # 2 years
-  
-  
-  
+  # get x-axix breaks and labels
+  span <- dspan(t_start, t_end)
   
   # make blank plot
   p2 <- ggplot(data=DT_intervals ) 
   
   # set axis labels for hours
-  p2 <- p2 + scale_x_datetime(limits = c(t_start, t_end), date_breaks =dbreaks, date_labels = dlabels)
+  p2 <- p2 + scale_x_datetime(limits = c(t_start, t_end), 
+                              date_breaks = span$dbreaks, 
+                              date_labels = span$dlabels)
   
   # set limits for y-scale
   #p2 <- p2 + scale_y_continuous(limits=c(0,5))
   p2 <- p2 + coord_cartesian(ylim = c(0.01, 5)) 
   
   # plot hot.water using pink rectangles
-  p2 <- p2 + geom_rect(aes(xmin = date.time, xmax = date.time + dseconds(1), ymin = hot_water.min, ymax = hot_water.max), color="deeppink", fill="deeppink") 
+  p2 <- p2 + geom_rect(aes(xmin = date.time, 
+                           xmax = date.time + dseconds(1), 
+                           ymin = hot_water.min, 
+                           ymax = hot_water.max), 
+                       color="deeppink", fill="deeppink") 
   
   # plot GPM using blue rectangles
-  p2 <- p2 + geom_rect(aes(xmin = date.time, xmax = date.time + dseconds(1), ymin = total_water.min, ymax = total_water.max), color="deepskyblue", fill="deepskyblue") 
+  p2 <- p2 + geom_rect(aes(xmin = date.time, 
+                           xmax = date.time + dseconds(1), 
+                           ymin = total_water.min, 
+                           ymax = total_water.max), 
+                       color="deepskyblue", fill="deepskyblue") 
   
   # plot overlap using purple rectangles
-  p2 <- p2 + geom_rect(aes(xmin = date.time, xmax = date.time + dseconds(1), ymin = overlap.min, ymax = overlap.max), color="purple", fill="purple") 
+  p2 <- p2 + geom_rect(aes(xmin = date.time, 
+                           xmax = date.time + dseconds(1), 
+                           ymin = overlap.min, 
+                           ymax = overlap.max), 
+                       color="purple", fill="purple") 
   
   # labels
-  p2 <- p2 + xlab(xlabel) + ylab("total[blue] / hot[pink] (GPM) ") + ggtitle(paste0("shower water flow ",k))
+  p2 <- p2 + xlab(span$xlabel) +
+    ylab("total[blue] / hot[pink] (GPM) ") +
+    ggtitle(paste0("shower water flow ",k))
   
   # titles and subtitles
   plot.title = paste0("shower water flows for house ",k)
@@ -391,9 +417,12 @@ plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4,
   
   if(save.charts) {
     # save to (giant) png file
-    ggsave(p2,path=wd_charts,file=paste0('shower_',k,'_',pdate,".png"),width=10,height=7)
+    ggsave(p2,path=wd_charts,file=paste0('shower_',k,'_',pdate,".png"),
+           width=10,height=7)
+    
     # save to (giant) pdf file
-    ggsave(p2,path=wd_charts,file=paste0('shower_',k,'_',pdate,".pdf"),width=20,height=14)
+    ggsave(p2,path=wd_charts,file=paste0('shower_',k,'_',pdate,".pdf"),
+           width=20,height=14)
     # the PDF format shows the short interval draws.
   }
   

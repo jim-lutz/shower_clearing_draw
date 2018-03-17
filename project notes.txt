@@ -331,4 +331,9 @@ next steps?
 2018-03-16
     build a new function to chart just the shower intervals.        
     
+2018-03-17
+    new version of R, R version 3.4.4 (2018-03-15), auto-installed this morning
+    made dspan() function for pretty x-axis time data
+    
+    try incremental reverse flow average and variance to see if end of clearing draw shows up
     
