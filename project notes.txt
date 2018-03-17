@@ -334,6 +334,15 @@ next steps?
 2018-03-17
     new version of R, R version 3.4.4 (2018-03-15), auto-installed this morning
     made dspan() function for pretty x-axis time data
+    looked at some showers
+    clocks lagged for s='Seattle'; k=13431; l=1; m='hot water' and
+    more by end of logging dates.
+    found some clean & dirty showers.
+
     
     try incremental reverse flow average and variance to see if end of clearing draw shows up
+    look at shift()? to make a matrix?
+    
+    
+    
     
