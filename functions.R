@@ -198,7 +198,7 @@ get.tdb.info <- function(this_tdb) {
 
 plot_shower <- function (s=study, l=logging, k=KEYCODE, DT=DT_shower_interval4, 
                          t1, t2, save.charts=FALSE) {
-  # function to plot power and water flow for one siteID
+  # function to plot total and hot water flow for one slk
   # s = study               - Seattle | EBMUD
   # l = logging             - 1 | 2 | 3 , the phase of the study
   # k = KEYCODE             - 5 digit integer that identifies site
