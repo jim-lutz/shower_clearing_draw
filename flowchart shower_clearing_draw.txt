@@ -76,7 +76,13 @@ collect_shower_intervals.R
             ./data/Aquacraft/*/*/*.tdb   
     output: ./data/DT_shower_Flows.RData        
         
-
+view_shower_intervals.R
+    # script to plot interval data and shower-only interval data
+    input:  ./data/DT_shower_interval4.RData
+            ./data/DT_shower_Flows.RData        
+    # finds some good & bad example showers
+    
+    
 
        
 
