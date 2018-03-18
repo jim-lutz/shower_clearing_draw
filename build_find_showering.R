@@ -55,6 +55,32 @@ DT_1shower[, `:=`(StartTime = NULL,
                   date.time = NULL)
            ]
 
-# calculate Y, test case i==4, that's probably best for this shower
-DT_1shower[1:4, Y4:= mean(Rate[1:4])]
-DT_1shower[5:.N, Y4:= mean(Rate[4:.N])]
+# create new column for every row
+# clearing draw at the begining, showering draw at the end
+
+# size of data.table
+ndt = nrow(DT_1shower)
+
+# this for the clearing draw
+for (r in 1:ndt) {  # do this for each row
+  set(DT_1shower,                          # modify data.table DT_1shower
+      i = 1:r,                             # apply to the first r rows
+      j = paste0('Y',r),                   # make the column names
+      value = mean(DT_1shower$Rate[1:r])   # average of Rate for the first r rows
+      )
+}
+head(DT_1shower)
+tail(DT_1shower)
+# seems to have worked
+
+# now for the showering draw
+for (r in 1:ndt) {  # do this for each row
+  set(DT_1shower,                                 # modify data.table DT_1shower
+      i = (r+1):ndt,                              # apply to the last r-1 rows
+      j = paste0('Y',r),                          # make the column names
+      value = mean(DT_1shower$Rate[((r+1):ndt)])  # average of Rate for the last r-1 rows
+  )
+}
+head(DT_1shower[, paste0('Y',1:5)])
+tail(DT_1shower[, paste0('Y',31:35)])
+# seems to have worked
