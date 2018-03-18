@@ -84,3 +84,29 @@ for (r in 1:ndt) {  # do this for each row
 head(DT_1shower[, paste0('Y',1:5)])
 tail(DT_1shower[, paste0('Y',31:35)])
 # seems to have worked
+
+# build an array of rmses
+for (r in 1:ndt) {  # do this for each row
+  yn = paste0('Y',r)  # name of Y column to use
+  rmse[r] <- DT_1shower[, sqrt(mean((Rate-get(yn))^2))]  
+}
+
+# the index of the best fit
+i <- which.min(rmse)
+
+# the RMSE of the best fit
+rmse[i]
+
+# find R1, predicted Rate for clearing draw
+DT_1shower[1,get(paste0('Y',i))]
+
+# find R2, predicted Rate for showering draw
+DT_1shower[.N,get(paste0('Y',i))]
+
+# actually what want is duration from i+1 to .N
+DT_1shower[(i+1):.N,list(Rate)]
+
+# actual Rate is ave from past index to last couple records
+DT_1shower[(i+1):(.N-2),mean(Rate)]
+
+

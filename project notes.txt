@@ -348,7 +348,13 @@ next steps?
     test to find best fit of Y = Y1 ave(y) for t<= t1 & Y2 for t > t1
     then showering duration  is tn-t1 and showering rate is Y2
     
-     
+    got way to find index of last of the clearing draw.
+    calc aveRate from next Rate to a couple records short of end, to avoid tapering off
+    
+    calc duration as vol / aveRate
+    where vol = sum(Rate)*1/6, summed to include the tapering off.  
+    
+    Maybe figure out how to plot best fit on chart as well.
     
     
     
