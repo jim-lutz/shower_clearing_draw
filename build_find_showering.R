@@ -25,8 +25,8 @@ s='Seattle'; k=13431; l=1; m='total water'
 t1="1999-10-27 17:40:00"
 t2="1999-10-27 17:47:00"
 
-# take a look
-plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2) 
+# take a look and save plot 
+plot1 <- plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2, save.charts = TRUE) 
 
 # get data for 'total water' for this shower
 DT_1shower <-
@@ -74,9 +74,9 @@ tail(DT_1shower)
 # seems to have worked
 
 # now for the showering draw
-for (r in 1:ndt) {  # do this for each row
+for (r in 2:ndt) {  # do this for each row, not needed for first row
   set(DT_1shower,                                 # modify data.table DT_1shower
-      i = (r+1):ndt,                              # apply to the last r-1 rows
+      i = (r):ndt,                              # apply to the last r-1 rows
       j = paste0('Y',r),                          # make the column names
       value = mean(DT_1shower$Rate[((r+1):ndt)])  # average of Rate for the last r-1 rows
   )
@@ -88,7 +88,7 @@ tail(DT_1shower[, paste0('Y',31:35)])
 # build an array of rmses
 for (r in 1:ndt) {  # do this for each row
   yn = paste0('Y',r)  # name of Y column to use
-  rmse[r] <- DT_1shower[, sqrt(mean((Rate-get(yn))^2))]  
+  rmse[r] <- DT_1shower[, sqrt(mean((Rate-get(yn))^2))]  # change to mean absolute err to reduce impact of outliers?
 }
 
 # the index of the best fit
