@@ -57,7 +57,7 @@ DT_shower_Flows[study==s & KEYCODE==k & logging==l &
                 t1 <= StartTime & StartTime <= t2,][order(StartTime,EventID)]
 plot_water(s, l, k, DT=DT_shower_interval4, t1, t2)
 # not your typical shower
-plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2) 
+plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2, save.charts=TRUE) 
 # shower defined differently for hot water 
 # this will be a good test for extracting showering time
 
@@ -83,7 +83,7 @@ t2="1999-11-08 21:25:00"
 DT_shower_Flows[study==s & KEYCODE==k & logging==l &  
                 t1 <= StartTime & StartTime <= t2,][order(StartTime,EventID)]
 plot_water(s, l, k, DT=DT_shower_interval4, t1, t2)
-plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2) 
+plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2, save.charts=TRUE) 
 # hot offset (delayed) by ~15 secs?
 # probably one shower, shower starts hot only, then adds cold?
 # with something else at 21:21?
@@ -111,7 +111,7 @@ t2="1999-11-07 10:52:00"
 DT_shower_Flows[study==s & KEYCODE==k & logging==l &  
                 t1 <= StartTime & StartTime <= t2,][order(StartTime,EventID)]
 plot_water(s, l, k, DT=DT_shower_interval4, t1, t2)
-plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2) 
+plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2, save.charts=TRUE) 
 # shower starts cold only, then adds hot?
 # hot delayed by about 30 seconds?
 # funny way to turn it off.
@@ -138,7 +138,7 @@ plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2)
 t1="1999-11-09 19:39:50"
 t2="1999-11-09 19:43:25"
 plot_water(s, l, k, DT=DT_shower_interval4, t1, t2)
-plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2) 
+plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2, save.charts=TRUE) 
 # the tail of total water shower was classified as something else.
 # would line up better if it was recognized as tail of shower.
 
