@@ -28,12 +28,15 @@ t2="1999-10-27 17:47:00"
 # take a look and save plot 
 plot1 <- plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2, save.charts = TRUE) 
 
+# look at the plot
+plot1
+
 # get data for 'total water' for this shower
 DT_1shower <-
 DT_shower_Flows[study==s & KEYCODE==k & logging==l & meter==m &
                   t1 <= StartTime & StartTime <= t2,]
 
-# only StartTime & Rate
+# only StartTime & Rate, drop sklm and Name
 DT_1shower <- DT_1shower[,list(StartTime,Rate)]
 
 # get seconds from start as numbers
@@ -51,62 +54,88 @@ start.time <- DT_1shower$date.time[1]
 DT_1shower[, dsec:=as.numeric(as.duration(interval(start.time, date.time)))]
 
 # drop times now
-DT_1shower[, `:=`(StartTime = NULL,
-                  date.time = NULL)
-           ]
+# DT_1shower[, `:=`(StartTime = NULL,
+#                   date.time = NULL)
+#            ]
 
-# create new column for every row
-# clearing draw at the begining, showering draw at the end
+# create a new column, Yxx, for every row with value of
+# average of Rate up to that time as clearing draw , 
+# average of Rate after that time as showering draw 
 
-# size of data.table
-ndt = nrow(DT_1shower)
+# number of intervals in data.table
+nint = nrow(DT_1shower)
+# [1] 35
 
 # this for the clearing draw
-for (r in 1:ndt) {  # do this for each row
+for (r in 1:nint) {  # do this for each row
   set(DT_1shower,                          # modify data.table DT_1shower
       i = 1:r,                             # apply to the first r rows
       j = paste0('Y',r),                   # make the column names
       value = mean(DT_1shower$Rate[1:r])   # average of Rate for the first r rows
       )
 }
-head(DT_1shower)
-tail(DT_1shower)
+str(DT_1shower)
+ncol(DT_1shower)
+# [1] 39
+
+DT_1shower[1:5, 1:10]
+DT_1shower[(nint-5):nint, (nint-5):(nint+4)]
 # seems to have worked
 
 # now for the showering draw
-for (r in 2:ndt) {  # do this for each row, not needed for first row
-  set(DT_1shower,                                 # modify data.table DT_1shower
-      i = (r):ndt,                              # apply to the last r-1 rows
-      j = paste0('Y',r),                          # make the column names
-      value = mean(DT_1shower$Rate[((r+1):ndt)])  # average of Rate for the last r-1 rows
+for (r in 2:nint) {  # do this for each row, except the first
+  set(DT_1shower,                            # modify data.table DT_1shower
+      i = r:nint,                            # apply to the last r-1 rows
+      j = paste0('Y',(r-1)),                 # make the column names, only Y1 - Y34
+      value = mean(DT_1shower$Rate[r:nint])  # average of Rate for remaining rows after r
   )
 }
-head(DT_1shower[, paste0('Y',1:5)])
-tail(DT_1shower[, paste0('Y',31:35)])
+DT_1shower[1:5, 1:10]
+DT_1shower[(nint-5):nint, (nint-5):(nint+4)]
 # seems to have worked
 
-# build an array of rmses
-for (r in 1:ndt) {  # do this for each row
+# initialize rmse
+rmse <- rep(NA, nint)
+
+# build an array of rmses between each Yxx and Rate
+for (r in 1:nint) {  # do this for each row
   yn = paste0('Y',r)  # name of Y column to use
   rmse[r] <- DT_1shower[, sqrt(mean((Rate-get(yn))^2))]  # change to mean absolute err to reduce impact of outliers?
 }
 
 # the index of the best fit
 i <- which.min(rmse)
+# [1] 4
 
 # the RMSE of the best fit
 rmse[i]
+[1] 0.6187153
 
 # find R1, predicted Rate for clearing draw
-DT_1shower[1,get(paste0('Y',i))]
+R1 <- DT_1shower[1,get(paste0('Y',i))]
 
 # find R2, predicted Rate for showering draw
-DT_1shower[.N,get(paste0('Y',i))]
+R2 <- DT_1shower[.N,get(paste0('Y',i))]
 
-# actually what want is duration from i+1 to .N
-DT_1shower[(i+1):.N,list(Rate)]
+# schematic times
+s1 <- DT_1shower[1,date.time] # this is the start of clearing draw
+s2 <- DT_1shower[i,date.time] + dseconds(10) # this is the transition from clearing to showering, at end of interval
+s3 <- DT_1shower[.N,date.time] # this is the end of the showering
 
-# actual Rate is ave from past index to last couple records
-DT_1shower[(i+1):(.N-2),mean(Rate)]
+plot1
+
+x <- c(s1,s1,s2,s2,s3,s3)
+y <- c(0,R1,R1,R2,R2,0)
+l <- data.frame(x,y)
+
+# draw black lines on plot1
+plot2 <- plot1 + geom_line(data = l, aes(x=x,y=y))
+
+# save demo plot
+ggsave(plot2,path=wd_charts,file=paste0("shower__demo.png"),
+       width=10,height=7)
+
+
+
 
 
