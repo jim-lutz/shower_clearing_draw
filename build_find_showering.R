@@ -47,7 +47,8 @@ identical(DT_shower_Flows[EventID==332],DT_1shower)
 DT_1shower.copy <- copy(DT_1shower)
 
 # take a look at the plot total water only
-plot_shower_only(s, l, k, DT=DT_1shower, t1, t2) 
+plot1 <- plot_shower_only(s, l, k, DT=DT_1shower, t1, t2) 
+plot1
 
 find_showering <- function(DT) {
   # function to find the begining of a showering draw 
@@ -118,8 +119,6 @@ str(DT_1shower)
 # set timezone, all these Aquacraft sites are in the Pacific time zone
 tz="America/Los_Angeles"
 
-identical(DT_1shower,DT_1shower.copy)
-
 # convert StartTime to posix times
 DT_1shower[,date.time:=ymd_hms(StartTime, tz=tz)]
 
@@ -142,11 +141,11 @@ l <- data.frame(x,y)
 DT_1shower[,date.time:=NULL]
 
 # draw black lines on plot1
-plot1 <- plot_shower_only(s, l, k, DT=DT_1shower, t1, t2) 
-plot2 <- plot1 + geom_line(data = l, aes(x=x,y=y))
+plot2 <- plot1 + geom_vline(xintercept = start)
+plot2
 
 # save demo plot
-ggsave(plot2,path=wd_charts,file=paste0("shower__demo.png"),
+ggsave(plot2,path=wd_charts,file=paste0("shower__demo2.png"),
        width=10,height=7)
 
 
