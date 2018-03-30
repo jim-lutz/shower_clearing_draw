@@ -43,10 +43,11 @@ DT_shower_Flows[study==s & KEYCODE==k & logging==l & meter==m &
 identical(DT_shower_Flows[EventID==332],DT_1shower)
 # [1] TRUE
 
+# having trouble after find_showering
+DT_1shower.copy <- copy(DT_1shower)
+
 # take a look at the plot total water only
 plot_shower_only(s, l, k, DT=DT_1shower, t1, t2) 
-
-DT_1shower.copy <- copy(DT_1shower)
 
 find_showering <- function(DT) {
   # function to find the begining of a showering draw 
@@ -111,7 +112,7 @@ find_showering <- function(DT) {
 }
 
 # test the find_showering function
-start <- find_showering(DT=DT_1shower)
+start <- find_showering(DT=DT_1shower.copy)
 
 str(DT_1shower)
 # set timezone, all these Aquacraft sites are in the Pacific time zone
@@ -136,6 +137,9 @@ s3 <- DT_1shower[.N,date.time] # this is the end of the showering
 x <- c(s1,s1,s2,s2,s3,s3)
 y <- c(0,Rclearing,Rclearing,Rshowering,Rshowering,0)
 l <- data.frame(x,y)
+
+# remove date.time?
+DT_1shower[,date.time:=NULL]
 
 # draw black lines on plot1
 plot1 <- plot_shower_only(s, l, k, DT=DT_1shower, t1, t2) 
