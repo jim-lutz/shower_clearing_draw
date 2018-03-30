@@ -14,7 +14,8 @@ source("setup_wd.R")
 # get some useful functions
 source("functions.R")
 
-# load DT_shower_Flows.RData, for plot_shower_only()
+# load DT_shower_Flows.RData, this is the shower only interval data
+# for plot_shower_only()
 load(file = paste0(wd_data,"DT_shower_Flows.RData"))
 str(DT_shower_Flows)
 
@@ -30,6 +31,7 @@ plot1 <- plot_shower_only(s, l, k, DT=DT_shower_Flows, t1, t2, save.charts = TRU
 
 # look at the plot
 plot1
+# it's an archetypical shower
 
 # get data for 'total water' for this shower
 DT_1shower <-
@@ -50,7 +52,7 @@ DT_1shower[,date.time:=ymd_hms(StartTime, tz=tz)]
 # initial time
 start.time <- DT_1shower$date.time[1]
 
-# duration, in seconds since start of shower
+# seconds since start of shower at start of each interval
 DT_1shower[, dsec:=as.numeric(as.duration(interval(start.time, date.time)))]
 
 # drop times now
@@ -66,7 +68,13 @@ DT_1shower[, dsec:=as.numeric(as.duration(interval(start.time, date.time)))]
 nint = nrow(DT_1shower)
 # [1] 35
 
-# this for the clearing draw
+# build a new column for every interval
+# each column will consist of two parts
+# the average flow rate up to and including that interval (clearing draw)
+# then the average flow rate during all subsequent intervals (showering draw)
+# this is used to test which interval best starts the showering draw
+
+# this for the <= intervals (clearing draw)
 for (r in 1:nint) {  # do this for each row
   set(DT_1shower,                          # modify data.table DT_1shower
       i = 1:r,                             # apply to the first r rows
@@ -82,7 +90,7 @@ DT_1shower[1:5, 1:10]
 DT_1shower[(nint-5):nint, (nint-5):(nint+4)]
 # seems to have worked
 
-# now for the showering draw
+# now for the subsequent intervals (showering draw)
 for (r in 2:nint) {  # do this for each row, except the first
   set(DT_1shower,                            # modify data.table DT_1shower
       i = r:nint,                            # apply to the last r-1 rows
@@ -103,13 +111,16 @@ for (r in 1:nint) {  # do this for each row
   rmse[r] <- DT_1shower[, sqrt(mean((Rate-get(yn))^2))]  # change to mean absolute err to reduce impact of outliers?
 }
 
+# look at rmses
+rmse
+
 # the index of the best fit
 i <- which.min(rmse)
 # [1] 4
 
 # the RMSE of the best fit
 rmse[i]
-[1] 0.6187153
+# [1] 0.6187153
 
 # find R1, predicted Rate for clearing draw
 R1 <- DT_1shower[1,get(paste0('Y',i))]

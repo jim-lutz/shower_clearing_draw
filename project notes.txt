@@ -356,5 +356,7 @@ next steps?
     
     Maybe figure out how to plot best fit on chart as well.
     
-    
+2018-03-30
+
+    reviewed build_find_shower and improved documentation slightly    
     
