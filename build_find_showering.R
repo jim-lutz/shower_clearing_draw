@@ -19,7 +19,15 @@ source("functions.R")
 load(file = paste0(wd_data,"DT_shower_Flows.RData"))
 str(DT_shower_Flows)
 
-# try one skl while building graphing function plot_shower_only
+# how many showers?
+DT_shower_Flows[,list(nshowers=length(unique(EventID))), 
+                by = c("study", "KEYCODE", "logging", "meter")
+                ][,list(totshowers=sum(nshowers)), by = meter]
+#          meter totshowers
+# 1: total water       1255
+# 2:   hot water       1252
+
+# try one sklm while building function find_showering()
 s='Seattle'; k=13431; l=1; m='total water'
 
 # from view_shower_intervals.R develop on a good shower
@@ -38,89 +46,71 @@ DT_1shower <-
 DT_shower_Flows[study==s & KEYCODE==k & logging==l & meter==m &
                   t1 <= StartTime & StartTime <= t2,]
 
-# only StartTime & Rate, drop sklm and Name
-DT_1shower <- DT_1shower[,list(StartTime,Rate)]
+# only one EventID, see if missed any of that EventID
+identical(DT_shower_Flows[EventID==332],DT_1shower)
+# [1] TRUE
 
-# get seconds from start as numbers
+# temporary data.table used to build function
+DT <- DT_1shower
 
-# set timezone, all these Aquacraft sites are in the Pacific time zone
-tz="America/Los_Angeles"
+find_showering <- function(DT) {
+  # function to find the begining of a showering draw 
+  # given the interval data for shower
+  # DT = one shower extracted from DT_shower_Flows.RData
+  
+  # set timezone, all these Aquacraft sites are in the Pacific time zone
+  tz="America/Los_Angeles"
+  
+  # convert StartTime to posix times
+  DT[,date.time:=ymd_hms(StartTime, tz=tz)]
+  
+  # build a new column for every interval
+  # each column will consist of two parts
+  # the average flow rate up to and including that interval (clearing draw)
+  # then the average flow rate during all subsequent intervals (showering draw)
+  # this is used to test which interval best starts the showering draw
+  nint = nrow(DT)
+  
+  # this for the <= intervals (clearing draw)
+  for (r in 1:nint) {  # do this for each row
+    set(DT,                          # modify data.table DT_1shower
+        i = 1:r,                     # apply to the first r rows
+        j = paste0('Y',r),           # make the column names
+        value = mean(DT$Rate[1:r])   # average of Rate for the first r rows
+    )
+  }
+  
+  # now for the subsequent intervals (showering draw)
+  for (r in 2:nint) {  # do this for each row, except the first
+    set(DT,                            # modify data.table DT_1shower
+        i = r:nint,                    # apply to the last r rows
+        j = paste0('Y',(r-1)),         # make the column names
+        value = mean(DT$Rate[r:nint])  # average of Rate for remaining rows after r
+    )
+  }
+  
+  # initialize rmse
+  rmse <- rep(NA, nint)
+  
+  # build an array of rmses between each Yxx and Rate
+  for (r in 1:nint) {  # do this for each row
+    yn = paste0('Y',r)  # name of Y column to use
+    rmse[r] <- DT[, sqrt(mean((Rate-get(yn))^2))] 
+  }
+  
+  # the index of the best fit
+  i <- which.min(rmse)
+  
+  # transition from clearing to showering, at end of interval
+  start.shower <- DT[i,date.time] + dseconds(10)
+  # as POSIXct
 
-# convert StartTime to posix times
-DT_1shower[,date.time:=ymd_hms(StartTime, tz=tz)]
+  return(start.shower)  
 
-# initial time
-start.time <- DT_1shower$date.time[1]
-
-# seconds since start of shower at start of each interval
-DT_1shower[, dsec:=as.numeric(as.duration(interval(start.time, date.time)))]
-
-# drop times now
-# DT_1shower[, `:=`(StartTime = NULL,
-#                   date.time = NULL)
-#            ]
-
-# create a new column, Yxx, for every row with value of
-# average of Rate up to that time as clearing draw , 
-# average of Rate after that time as showering draw 
-
-# number of intervals in data.table
-nint = nrow(DT_1shower)
-# [1] 35
-
-# build a new column for every interval
-# each column will consist of two parts
-# the average flow rate up to and including that interval (clearing draw)
-# then the average flow rate during all subsequent intervals (showering draw)
-# this is used to test which interval best starts the showering draw
-
-# this for the <= intervals (clearing draw)
-for (r in 1:nint) {  # do this for each row
-  set(DT_1shower,                          # modify data.table DT_1shower
-      i = 1:r,                             # apply to the first r rows
-      j = paste0('Y',r),                   # make the column names
-      value = mean(DT_1shower$Rate[1:r])   # average of Rate for the first r rows
-      )
-}
-str(DT_1shower)
-ncol(DT_1shower)
-# [1] 39
-
-DT_1shower[1:5, 1:10]
-DT_1shower[(nint-5):nint, (nint-5):(nint+4)]
-# seems to have worked
-
-# now for the subsequent intervals (showering draw)
-for (r in 2:nint) {  # do this for each row, except the first
-  set(DT_1shower,                            # modify data.table DT_1shower
-      i = r:nint,                            # apply to the last r-1 rows
-      j = paste0('Y',(r-1)),                 # make the column names, only Y1 - Y34
-      value = mean(DT_1shower$Rate[r:nint])  # average of Rate for remaining rows after r
-  )
-}
-DT_1shower[1:5, 1:10]
-DT_1shower[(nint-5):nint, (nint-5):(nint+4)]
-# seems to have worked
-
-# initialize mae
-mae <- rep(NA, nint)
-
-# build an array of maes between each Yxx and Rate
-for (r in 1:nint) {  # do this for each row
-  yn = paste0('Y',r)  # name of Y column to use
-  mae[r] <- DT_1shower[, mean(abs(Rate-get(yn)))]  # mean absolute err to reduce impact of outliers?
 }
 
-# look at maes
-mae
 
-# the index of the best fit
-i <- which.min(mae)
-# [1] 3
-
-# the mae of the best fit
-mae[i]
-# [1] 0.3175952
+start <- find_showering(DT_1shower)
 
 # find R1, predicted Rate for clearing draw
 R1 <- DT_1shower[1,get(paste0('Y',i))]
@@ -140,12 +130,10 @@ y <- c(0,R1,R1,R2,R2,0)
 l <- data.frame(x,y)
 
 # draw black lines on plot1
-plot3 <- plot1 + geom_line(data = l, aes(x=x,y=y))
-# it's not as good a predictor in this case?
-
+plot2 <- plot1 + geom_line(data = l, aes(x=x,y=y))
 
 # save demo plot
-ggsave(plot3,path=wd_charts,file=paste0("shower__demo3.png"),
+ggsave(plot2,path=wd_charts,file=paste0("shower__demo.png"),
        width=10,height=7)
 
 

@@ -370,5 +370,19 @@ next steps?
      
     should be looking for the MAE for just the showering portion?
     
+    use git to revert to prior /home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/build_find_showering.R?
     
+    git checkout 4031a5 -- ./build_find_showering.R
+    
+    seemed to work?
+    
+    multiple functions, given the interval data for shower
+        determine start of showering draw
+        plot with vertical line at beginnning of showering draw
+        remove round-offs at end (& begining?) of shower
+        calculate showering draw duration, volume, average flowrate
+        calculate clearing draw duration, volume, don't care about flow rate
+        
+    do the first 2 and look at the results for several showers 
+    before deciding what to do next
     
