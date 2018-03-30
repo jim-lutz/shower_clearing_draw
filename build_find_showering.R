@@ -102,25 +102,25 @@ DT_1shower[1:5, 1:10]
 DT_1shower[(nint-5):nint, (nint-5):(nint+4)]
 # seems to have worked
 
-# initialize rmse
-rmse <- rep(NA, nint)
+# initialize mae
+mae <- rep(NA, nint)
 
-# build an array of rmses between each Yxx and Rate
+# build an array of maes between each Yxx and Rate
 for (r in 1:nint) {  # do this for each row
   yn = paste0('Y',r)  # name of Y column to use
-  rmse[r] <- DT_1shower[, sqrt(mean((Rate-get(yn))^2))]  # change to mean absolute err to reduce impact of outliers?
+  mae[r] <- DT_1shower[, mean(abs(Rate-get(yn)))]  # mean absolute err to reduce impact of outliers?
 }
 
-# look at rmses
-rmse
+# look at maes
+mae
 
 # the index of the best fit
-i <- which.min(rmse)
-# [1] 4
+i <- which.min(mae)
+# [1] 3
 
-# the RMSE of the best fit
-rmse[i]
-# [1] 0.6187153
+# the mae of the best fit
+mae[i]
+# [1] 0.3175952
 
 # find R1, predicted Rate for clearing draw
 R1 <- DT_1shower[1,get(paste0('Y',i))]
@@ -140,10 +140,12 @@ y <- c(0,R1,R1,R2,R2,0)
 l <- data.frame(x,y)
 
 # draw black lines on plot1
-plot2 <- plot1 + geom_line(data = l, aes(x=x,y=y))
+plot3 <- plot1 + geom_line(data = l, aes(x=x,y=y))
+# it's not as good a predictor in this case?
+
 
 # save demo plot
-ggsave(plot2,path=wd_charts,file=paste0("shower__demo.png"),
+ggsave(plot3,path=wd_charts,file=paste0("shower__demo3.png"),
        width=10,height=7)
 
 

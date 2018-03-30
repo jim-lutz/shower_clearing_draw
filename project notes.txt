@@ -358,5 +358,17 @@ next steps?
     
 2018-03-30
 
-    reviewed build_find_shower and improved documentation slightly    
+    reviewed build_find_shower and improved documentation slightly  
+    try mean absolute error. It's less influenced by outliers. 
+    in the Aquacraft interval data, outliers will happen when 
+    the start and end of the shower just barely miss the edge of the interval
+    want to avoid this effect
+    see Chai, T., and R. R. Draxler. “Root Mean Square Error (RMSE) or Mean Absolute Error (MAE)? – Arguments against Avoiding RMSE in the Literature.” Geoscientific Model Development 7, no. 3 (June 30, 2014): 1247–50. https://doi.org/10.5194/gmd-7-1247-2014.
+    for discussion of this
+    
+    for the one sample tested, it was not as good at finding the start of the showering draw
+     
+    should be looking for the MAE for just the showering portion?
+    
+    
     
