@@ -48,7 +48,7 @@ plot1 <- plot_shower_only(s, l, k, DT=DT_1shower, t1, t2)
 plot1
 
 # for testing function
-# DT = DT_1shower.copy
+#DT = DT_1shower.copy
 
 # test the find_showering function
 start <- find_showering(DT=DT_1shower.copy)

@@ -81,6 +81,12 @@ view_shower_intervals.R
     input:  ./data/DT_shower_interval4.RData
             ./data/DT_shower_Flows.RData        
     # finds some good & bad example showers
+  
+build_find_showering.R
+    # script to function to find showering time from shower-only interval data
+    input:  ./data/DT_shower_Flows.RData        
+    # used this to build find_showering()
+    
     
     
 

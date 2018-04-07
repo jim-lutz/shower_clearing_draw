@@ -386,5 +386,7 @@ next steps?
     do the first 2 and look at the results for several showers 
     before deciding what to do next
     
-    
+2018-04-06
+    build a data.table of all shower events
+    slkm, EventID, start, end, showering.start, rmse    
     
