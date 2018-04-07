@@ -904,3 +904,73 @@ collect.showers <- function(this_sklm, DT=DT_shower_interval4) {
   
 }
 
+
+find_showering <- function(DT) {
+  # function to find the begining of a showering draw 
+  # given the interval data for shower
+  # DT = one shower's interval data extracted from DT_shower_Flows.RData
+  # returns the following list:
+  # start.shower$time   time showering draw started, as POSIXct
+  # start.shower$RMSE   RMSE of fitting 2-step draw pattern to interval data
+  
+  # make a copy of DT to avoid modifying original data.table?
+  DT.copy <- copy(DT)
+  
+  # set timezone, all these Aquacraft sites are in the Pacific time zone
+  tz="America/Los_Angeles"
+  
+  # convert StartTime to posix times
+  DT.copy[,date.time:=ymd_hms(StartTime, tz=tz)]
+  
+  # build a new column for every interval
+  # each column will consist of two parts
+  # the average flow rate up to and including that interval (clearing draw)
+  # then the average flow rate during all subsequent intervals (showering draw)
+  # this is used to test which interval best starts the showering draw
+  nint = nrow(DT.copy)
+  
+  # this for the <= intervals (clearing draw)
+  for (r in 1:nint) {  # do this for each row
+    set(DT.copy,                         # modify data.table
+        i = 1:r,                         # apply to the first r rows
+        j = paste0('Y',r),               # make the column names
+        value = mean(DT.copy$Rate[1:r])  # average of Rate for the first r rows
+    )
+  }
+  
+  # now for the subsequent intervals (showering draw)
+  for (r in 2:nint) {  # do this for each row, except the first
+    set(DT.copy,                            # modify data.table
+        i = r:nint,                         # apply to the last r rows
+        j = paste0('Y',(r-1)),              # make the column names
+        value = mean(DT.copy$Rate[r:nint])  # average of Rate for remaining rows after r
+    )
+  }
+  
+  # initialize rmse
+  rmse <- rep(NA, nint)
+  
+  # build an array of rmses between each Yxx and Rate
+  for (r in 1:nint) {  # do this for each row
+    yn = paste0('Y',r)  # name of Y column to use
+    rmse[r] <- DT.copy[, sqrt(mean((Rate-get(yn))^2))] 
+  }
+  
+  # the index of the best fit
+  i <- which.min(rmse)
+  # [1] 4
+  
+  # build list to return
+  start.shower <- list( RMSE = rmse[i],
+                        time = DT.copy[i,date.time] + dseconds(10)
+  )
+  # transition from clearing to showering, at end of interval
+  # as POSIXct
+  
+  # clear up working data.table
+  rm(DT.copy)
+  
+  return(start.shower)  
+  
+}
+

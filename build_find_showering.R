@@ -1,8 +1,5 @@
 # build_find_showering.R
 # script to function to find showering time from shower-only interval data
-# Jim Lutz # view_shower_intervals.R
-# script to plot interval data and shower-only interval data
-# initially used to build a plot_shower_only graph
 # Jim Lutz "Fri Mar 16 19:35:44 2018"
 
 # set packages & etc
@@ -50,67 +47,8 @@ DT_1shower.copy <- copy(DT_1shower)
 plot1 <- plot_shower_only(s, l, k, DT=DT_1shower, t1, t2) 
 plot1
 
-find_showering <- function(DT) {
-  # function to find the begining of a showering draw 
-  # given the interval data for shower
-  # DT = one shower's interval data extracted from DT_shower_Flows.RData
-  
-  # make a copy of DT to avoid modifying original data.table?
-  DT.copy <- copy(DT)
-  
-  # set timezone, all these Aquacraft sites are in the Pacific time zone
-  tz="America/Los_Angeles"
-  
-  # convert StartTime to posix times
-  DT.copy[,date.time:=ymd_hms(StartTime, tz=tz)]
-  
-  # build a new column for every interval
-  # each column will consist of two parts
-  # the average flow rate up to and including that interval (clearing draw)
-  # then the average flow rate during all subsequent intervals (showering draw)
-  # this is used to test which interval best starts the showering draw
-  nint = nrow(DT.copy)
-  
-  # this for the <= intervals (clearing draw)
-  for (r in 1:nint) {  # do this for each row
-    set(DT.copy,                         # modify data.table
-        i = 1:r,                         # apply to the first r rows
-        j = paste0('Y',r),               # make the column names
-        value = mean(DT.copy$Rate[1:r])  # average of Rate for the first r rows
-    )
-  }
-  
-  # now for the subsequent intervals (showering draw)
-  for (r in 2:nint) {  # do this for each row, except the first
-    set(DT.copy,                            # modify data.table
-        i = r:nint,                         # apply to the last r rows
-        j = paste0('Y',(r-1)),              # make the column names
-        value = mean(DT.copy$Rate[r:nint])  # average of Rate for remaining rows after r
-    )
-  }
-  
-  # initialize rmse
-  rmse <- rep(NA, nint)
-  
-  # build an array of rmses between each Yxx and Rate
-  for (r in 1:nint) {  # do this for each row
-    yn = paste0('Y',r)  # name of Y column to use
-    rmse[r] <- DT.copy[, sqrt(mean((Rate-get(yn))^2))] 
-  }
-  
-  # the index of the best fit
-  i <- which.min(rmse)
-  
-  # transition from clearing to showering, at end of interval
-  start.shower <- DT.copy[i,date.time] + dseconds(10)
-  # as POSIXct
-
-  # clear up working data.table
-  rm(DT.copy)
-  
-  return(start.shower)  
-
-}
+# for testing function
+# DT = DT_1shower.copy
 
 # test the find_showering function
 start <- find_showering(DT=DT_1shower.copy)
@@ -123,14 +61,14 @@ tz="America/Los_Angeles"
 DT_1shower[,date.time:=ymd_hms(StartTime, tz=tz)]
 
 # find Rclearing, predicted average Rate for clearing draw
-Rclearing <- mean(DT_1shower[date.time<=start,Rate])
+Rclearing <- mean(DT_1shower[date.time<=start$time,Rate])
 
 # find Rshowering, predicted Rate for showering draw
-Rshowering <- mean(DT_1shower[date.time>start,Rate])
+Rshowering <- mean(DT_1shower[date.time>start$time,Rate])
 
 # schematic times
 s1 <- DT_1shower[1,date.time] # this is the start of clearing draw
-s2 <- start # this is the transition from clearing to showering, at end of interval
+s2 <- start$time # this is the transition from clearing to showering, at end of interval
 s3 <- DT_1shower[.N,date.time] # this is the end of the showering
 
 x <- c(s1,s1,s2,s2,s3,s3)
@@ -141,7 +79,7 @@ l <- data.frame(x,y)
 DT_1shower[,date.time:=NULL]
 
 # draw black lines on plot1
-plot2 <- plot1 + geom_vline(xintercept = start)
+plot2 <- plot1 + geom_vline(xintercept = start$time)
 plot2
 
 # save demo plot
