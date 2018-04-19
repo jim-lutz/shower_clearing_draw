@@ -389,4 +389,13 @@ next steps?
 2018-04-06
     build a data.table of all shower events
     slkm, EventID, start, end, showering.start, rmse    
+
+2018-04-18
+    got summarize_showers.R to work for 1 shower
+    add a warning if there's problems in find_showering
+    then run on all showers
+    
+    build a wrapper to plot a shower given one record from DT_summary
+    that's to look at the strange showers
+    
     

@@ -87,6 +87,10 @@ build_find_showering.R
     input:  ./data/DT_shower_Flows.RData        
     # used this to build find_showering()
     
+summarize_showers.R
+    # script to summarize information including clearing/showering draws for all showers.
+    input:  ./data/DT_shower_Flows.RData
+    output: ./data/DT_summary.RData 
     
     
 
