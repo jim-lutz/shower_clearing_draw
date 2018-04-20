@@ -39,7 +39,9 @@ sum(duplicated(DT_summary[,list(EventID)]))
 # [1] 946
 
 # are there duplicated shower EventIDs within a sklm?
-sum(duplicated(DT_summary))
+sum(duplicated(DT_summary[,list(EventID),
+                          by = c("study", "KEYCODE", "logging", "meter")
+                          ]))
 # [1] 0
 # have to refer to showers by sklm & EventID
 
@@ -54,6 +56,19 @@ for(i in 1:nrow(DT_summary)) {
   
   # get sklm for 1 shower as a data.table
   DT_sklm <- DT_summary[shower.id == i, list(study, KEYCODE, logging, meter, EventID)]
+  
+  # report status 
+  cat('\r',sprintf("i = %4i  study=%7s  KEYCODE=%5i  logging=%d  meter=%11s  EventID=%4i",
+          #",
+          i,
+          DT_sklm$study,
+          DT_sklm$KEYCODE,
+          DT_sklm$logging,
+          DT_sklm$meter,
+           DT_sklm$EventID
+          )
+  )
+  
   
   # retrieve interval Flow data for that 1 shower
   DT_1shower <- DT_shower_Flows[DT_sklm, 
