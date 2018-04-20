@@ -25,20 +25,27 @@ DT_shower_Flows[,list(nshowers=length(unique(EventID))),
 # 2:   hot water       1252
 
 # try one sklm while building function find_showering()
-s='Seattle'; k=13431; l=1; m='total water'
+# problem from summarize_showers.R
+# study=Seattle  KEYCODE=13431  logging=1  meter=  hot water  EventID= 318
+s='Seattle'; k=13431; l=1; m='hot water'; e=318
 
-# from view_shower_intervals.R develop on a good shower
-t1="1999-10-27 17:40:00"
-t2="1999-10-27 17:47:00"
-
-# get data for 'total water' for this shower
+# get data for 'this shower
 DT_1shower <-
-DT_shower_Flows[study==s & KEYCODE==k & logging==l & meter==m &
-                  t1 <= StartTime & StartTime <= t2,]
+DT_shower_Flows[study==s & KEYCODE==k & logging==l & meter==m & EventID==e,]
 
-# only one EventID, see if missed any of that EventID
-identical(DT_shower_Flows[EventID==332],DT_1shower)
-# [1] TRUE
+# look at DT_1shower
+DT_1shower
+# only one flow record?
+
+# look what else is happening then
+# from view_shower_intervals.R develop on a good shower
+t1="1999-10-27 20:15:00"
+t2="1999-10-27 20:20:00"
+
+View(DT_shower_Flows[study==s & KEYCODE==k & logging==l &
+        t1 <= StartTime & StartTime <= t2,])
+
+# looks like a one record shower.
 
 # having trouble after find_showering
 DT_1shower.copy <- copy(DT_1shower)

@@ -65,7 +65,7 @@ for(i in 1:nrow(DT_summary)) {
           DT_sklm$KEYCODE,
           DT_sklm$logging,
           DT_sklm$meter,
-           DT_sklm$EventID
+          DT_sklm$EventID
           )
   )
   
@@ -78,6 +78,9 @@ for(i in 1:nrow(DT_summary)) {
                                        "meter", 
                                        "EventID")
                                 ]
+  
+  # if it's only 1 or 2 records then go to the next shower
+  if( nrow(DT_1shower)<3 ) {next}
   
   # add start.draw and end.draw times for that shower
   start.draw <- min(DT_1shower$date.time)
