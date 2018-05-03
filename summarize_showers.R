@@ -134,3 +134,49 @@ for(i in 1:nrow(DT_summary)) {
 
 # save DT_summary
 save(DT_summary, file = paste0(wd_data,"DT_summary.RData"))
+
+
+# There were 50 or more warnings (use warnings() to see the first 50)
+# > warnings()
+# Warning messages:
+# 1: In rm("shower") : object 'shower' not found
+# 2: In rm(".start.draw.time", ".end.draw.time", ".vol.clearing",  ... :
+#   object '.start.draw.time' not found
+# 3: In rm(".start.draw.time", ".end.draw.time", ".vol.clearing",  ... :
+#   object '.end.draw.time' not found
+
+View(DT_summary)
+
+# look at shower.id ==368
+DT_summary[shower.id == 368,]
+# RMSE:flow.showering NA
+
+# look at flow data
+DT_shower_Flows[DT_summary[shower.id == 368,],
+                on = c("study", 
+                       "KEYCODE", 
+                       "logging", 
+                       "meter", 
+                       "EventID")
+                ]
+# is only 2 records.
+
+# see how many
+DT_summary[is.na(RMSE), 
+           list(nshowers = length(shower.id)), 
+           by=.(study,KEYCODE,logging,meter)] [order(KEYCODE)]
+# problems w/ KEYCODE 13219
+#       study KEYCODE logging       meter nshowers
+# 1:  Seattle   13219       2 total water        4
+# 2:  Seattle   13219       2   hot water        9
+# 3:  Seattle   13219       3   hot water        4
+# 4:  Seattle   13236       1   hot water        1
+# 5:  Seattle   13266       3 total water        2
+# 6:  Seattle   13431       1   hot water        1
+# 7:    EBMUD   22009       3 total water        1
+# 8:    EBMUD   22021       2   hot water        1
+# 9:    EBMUD   22021       2 total water        1
+# 10:   EBMUD   22037       3   hot water        1
+# 11:   EBMUD   22070       1 total water        1
+# 12:   EBMUD   22070       3 total water        1
+# 13:   EBMUD   22075       1   hot water        1
