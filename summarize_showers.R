@@ -45,14 +45,15 @@ sum(duplicated(DT_summary[,list(EventID),
 # [1] 0
 # have to refer to showers by sklm & EventID
 
-# add an index number to showers for ease of looping
+# add an shower index number to showers for ease of looping
 DT_summary[,shower.id := 1:nrow(DT_summary)]
 
 # loop through every shower
-for(i in 1:nrow(DT_summary)) {
+for(i in 1:2) {
+  # 1:nrow(DT_summary)
   
   # sample index for debugging
-  # i = 1
+  # i = 1 i = 2
   
   # get sklm for 1 shower as a data.table
   DT_sklm <- DT_summary[shower.id == i, 
@@ -84,8 +85,8 @@ for(i in 1:nrow(DT_summary)) {
   if( nrow(DT_1shower)<3 ) {next}
   
   # calc start.draw and end.draw times for that shower
-  start.draw <- min(DT_1shower$date.time)
-  end.draw   <- max(DT_1shower$date.time) + dseconds(10)
+  start.draw.time <- min(DT_1shower$date.time)
+  end.draw.time   <- max(DT_1shower$date.time) + dseconds(10)
   
   # call the find_showering function to get RMSE and start of showering draw
   shower <- find_showering(DT=DT_1shower)
@@ -95,9 +96,9 @@ for(i in 1:nrow(DT_summary)) {
   vol.showering <- DT_1shower[date.time >= shower$time, sum(Rate)/6]
   
   # get durations
-  dur.clearing  <- as.numeric(difftime(shower$time, start.draw, units = "mins"), 
+  dur.clearing  <- as.numeric(difftime(shower$time, start.draw.time, units = "mins"), 
                               units = "mins")
-  dur.showering <- as.numeric(difftime(end.draw, shower$time, units = "mins"),
+  dur.showering <- as.numeric(difftime(end.draw.time, shower$time, units = "mins"),
                               units = "mins")
 
   # get average flow rates
@@ -105,16 +106,17 @@ for(i in 1:nrow(DT_summary)) {
   flow.showering <- vol.showering / dur.showering
   
   # add calculated values to DT_summary
-  DT_summary[i, `:=` (RMSE            = shower$RMSE,
-                      start.draw      = start.draw,
-                      start.showering = shower$time,
-                      end.draw        = end.draw,
-                      vol.clearing    = vol.clearing,
-                      vol.showering   = vol.showering,
-                      dur.clearing    = dur.clearing,
-                      dur.showering   = dur.showering,
-                      flow.clearing   = flow.clearing,
-                      flow.showering  = flow.showering)
+  DT_summary[shower.id == i, 
+             `:=` (RMSE                 = shower$RMSE,
+                   start.draw.time      = start.draw.time,
+                   start.showering.time = shower$time,
+                   end.draw.time        = end.draw.time,
+                   vol.clearing         = vol.clearing,
+                   vol.showering        = vol.showering,
+                   dur.clearing         = dur.clearing,
+                   dur.showering        = dur.showering,
+                   flow.clearing        = flow.clearing,
+                   flow.showering       = flow.showering)
              ]
   
 }
