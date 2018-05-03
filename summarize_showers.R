@@ -55,14 +55,27 @@ for(i in 1:2) {
   # sample index for debugging
   # i = 1 i = 2
   
+  # remove temporary objects if they exist
+  if(exists("DT_sklm")==TRUE) {
+   # data.tables
+    rm("DT_sklm", "DT_1shower")
+    # lists
+    rm("shower")
+    # values
+    rm("start.draw.time", "end.draw.time",
+       "vol.clearing", "vol.showering",
+       "dur.clearing", "dur.showering",
+       "flow.clearing", "flow.showering")
+    }
+  
   # get sklm for 1 shower as a data.table
   DT_sklm <- DT_summary[shower.id == i, 
                         list(shower.id, study, KEYCODE, logging, meter, EventID)]
   
   # report status 
-  cat('\r',sprintf("i = %4i  study=%7s  KEYCODE=%5i  logging=%d  meter=%11s  EventID=%4i",
+  cat('\r',sprintf("shower.id = %4i study=%7s KEYCODE=%5i logging=%d meter=%11s EventID=%4i",
           #",
-          i,
+          DT_sklm$shower.id,
           DT_sklm$study,
           DT_sklm$KEYCODE,
           DT_sklm$logging,

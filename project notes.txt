@@ -400,6 +400,8 @@ next steps?
     
 2018-05-03
     use summarize_showers.R to build DT_summary.RData
+    loop problems
+    
     
     examine results in DT_summary for plausibility,
     plot distribution of rmses? 
