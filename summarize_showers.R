@@ -49,12 +49,11 @@ sum(duplicated(DT_summary[,list(EventID),
 DT_summary[,shower.id := 1:nrow(DT_summary)]
 
 # loop through every shower
-for(i in 1:2) {
-  # 1:nrow(DT_summary)
+for(i in 1:nrow(DT_summary)) {
+  # i in 1:2 #short loop for debugging only              
+  # i in 1:nrow(DT_summary) # actual loop
   
-  # sample index for debugging
-  # i = 1 i = 2
-  
+
   # remove temporary objects if they exist
   if(exists("DT_sklm")==TRUE) {
    # data.tables
@@ -62,10 +61,10 @@ for(i in 1:2) {
     # lists
     rm("shower")
     # values
-    rm("start.draw.time", "end.draw.time",
-       "vol.clearing", "vol.showering",
-       "dur.clearing", "dur.showering",
-       "flow.clearing", "flow.showering")
+    rm(".start.draw.time", ".end.draw.time",
+       ".vol.clearing",    ".vol.showering",
+       ".dur.clearing",    ".dur.showering",
+       ".flow.clearing",   ".flow.showering")
     }
   
   # get sklm for 1 shower as a data.table
@@ -73,8 +72,7 @@ for(i in 1:2) {
                         list(shower.id, study, KEYCODE, logging, meter, EventID)]
   
   # report status 
-  cat('\r',sprintf("shower.id = %4i study=%7s KEYCODE=%5i logging=%d meter=%11s EventID=%4i",
-          #",
+  cat('\r',sprintf("shower.id = %4i, study=%7s, KEYCODE=%5i, logging=%d, meter=%11s, EventID=%4i",
           DT_sklm$shower.id,
           DT_sklm$study,
           DT_sklm$KEYCODE,
@@ -98,38 +96,38 @@ for(i in 1:2) {
   if( nrow(DT_1shower)<3 ) {next}
   
   # calc start.draw and end.draw times for that shower
-  start.draw.time <- min(DT_1shower$date.time)
-  end.draw.time   <- max(DT_1shower$date.time) + dseconds(10)
+  .start.draw.time <- min(DT_1shower$date.time)
+  .end.draw.time   <- max(DT_1shower$date.time) + dseconds(10)
   
   # call the find_showering function to get RMSE and start of showering draw
   shower <- find_showering(DT=DT_1shower)
   
-  # get the volumes
-  vol.clearing  <- DT_1shower[date.time < shower$time, sum(Rate)/6]
-  vol.showering <- DT_1shower[date.time >= shower$time, sum(Rate)/6]
+  # get the volumes, gallons
+  .vol.clearing  <- DT_1shower[date.time < shower$time, sum(Rate)/6]
+  .vol.showering <- DT_1shower[date.time >= shower$time, sum(Rate)/6]
   
-  # get durations
-  dur.clearing  <- as.numeric(difftime(shower$time, start.draw.time, units = "mins"), 
+  # get durations, minutes
+  .dur.clearing  <- as.numeric(difftime(shower$time, .start.draw.time, units = "mins"), 
                               units = "mins")
-  dur.showering <- as.numeric(difftime(end.draw.time, shower$time, units = "mins"),
+  .dur.showering <- as.numeric(difftime(.end.draw.time, shower$time, units = "mins"),
                               units = "mins")
 
-  # get average flow rates
-  flow.clearing  <- vol.clearing / dur.clearing
-  flow.showering <- vol.showering / dur.showering
+  # get average flow rates, GPM
+  .flow.clearing  <- .vol.clearing / .dur.clearing
+  .flow.showering <- .vol.showering / .dur.showering
   
   # add calculated values to DT_summary
   DT_summary[shower.id == i, 
              `:=` (RMSE                 = shower$RMSE,
-                   start.draw.time      = start.draw.time,
+                   start.draw.time      = .start.draw.time,
                    start.showering.time = shower$time,
-                   end.draw.time        = end.draw.time,
-                   vol.clearing         = vol.clearing,
-                   vol.showering        = vol.showering,
-                   dur.clearing         = dur.clearing,
-                   dur.showering        = dur.showering,
-                   flow.clearing        = flow.clearing,
-                   flow.showering       = flow.showering)
+                   end.draw.time        = .end.draw.time,
+                   vol.clearing         = .vol.clearing,
+                   vol.showering        = .vol.showering,
+                   dur.clearing         = .dur.clearing,
+                   dur.showering        = .dur.showering,
+                   flow.clearing        = .flow.clearing,
+                   flow.showering       = .flow.showering)
              ]
   
 }
