@@ -398,4 +398,15 @@ next steps?
     build a wrapper to plot a shower given one record from DT_summary
     that's to look at the strange showers
     
+2018-05-03
+    use summarize_showers.R to build DT_summary.RData
+    
+    examine results in DT_summary for plausibility,
+    plot distribution of rmses? 
+    plot distribution of volumes and durations to exclude outliers?
+    distribution of difference of showering draws and clearing
+    draws pre and post conservation measures?
+    
+        
+        
     

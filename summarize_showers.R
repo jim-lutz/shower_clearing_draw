@@ -55,7 +55,8 @@ for(i in 1:nrow(DT_summary)) {
   # i = 1
   
   # get sklm for 1 shower as a data.table
-  DT_sklm <- DT_summary[shower.id == i, list(study, KEYCODE, logging, meter, EventID)]
+  DT_sklm <- DT_summary[shower.id == i, 
+                        list(shower.id, study, KEYCODE, logging, meter, EventID)]
   
   # report status 
   cat('\r',sprintf("i = %4i  study=%7s  KEYCODE=%5i  logging=%d  meter=%11s  EventID=%4i",
@@ -82,7 +83,7 @@ for(i in 1:nrow(DT_summary)) {
   # if it's only 1 or 2 records then go to the next shower
   if( nrow(DT_1shower)<3 ) {next}
   
-  # add start.draw and end.draw times for that shower
+  # calc start.draw and end.draw times for that shower
   start.draw <- min(DT_1shower$date.time)
   end.draw   <- max(DT_1shower$date.time) + dseconds(10)
   

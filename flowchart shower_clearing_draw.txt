@@ -30,7 +30,8 @@ get_data_table.R
     # script to test a function to get data tables from different Aquacraft datafiles
     input:  ./data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb
     
-        this was successful. Used mdb-export to export tables to csv file then read the csv file.
+        this was successful. Used mdb-export to export tables to csv file 
+        then read the csv file.
 
 get_showers.R
     # script to get shower data from all the 'LOGGING DATA '{1|2|3}{|Hot Water} tables
@@ -39,8 +40,10 @@ get_showers.R
     output: ./data/DT_showers.RData
             
 get_tdb_info.R
-    # script to build a data.table of information about all the Aquacraft EBMUD and Seattle tdb files
-    input:  ./data/Aquacraft/{EBMUD|Seattle}/{Pre Retrofit|Post Retrofit 1|Post Retrofit 2}/*.tdb
+    # script to build a data.table of information about all 
+    the Aquacraft EBMUD and Seattle tdb files
+    input:  ./data/Aquacraft/{EBMUD|Seattle}/
+                {Pre Retrofit|Post Retrofit 1|Post Retrofit 2}/*.tdb
     output: ./data/DT_tdb_info.RData
     
 shower_intervals.R
@@ -71,7 +74,8 @@ decode_EventID.R
             ./data/Aquacraft/*/*/*.tdb   
 
 collect_shower_intervals.R
-    # script to extract all shower interval data and save to one .Rdata file for later processing
+    # script to extract all shower interval data and save to 
+            one .Rdata file for later processing
     input:  ./data/DT_shower_interval4.RData
             ./data/Aquacraft/*/*/*.tdb   
     output: ./data/DT_shower_Flows.RData        
@@ -85,13 +89,17 @@ view_shower_intervals.R
 build_find_showering.R
     # script to function to find showering time from shower-only interval data
     input:  ./data/DT_shower_Flows.RData        
-    # used this to build find_showering()
+    # used this to build find_showering() function
     
 summarize_showers.R
     # script to summarize information including clearing/showering draws for all showers.
     input:  ./data/DT_shower_Flows.RData
     output: ./data/DT_summary.RData 
     
+examine_showers.R    
+    # script to examine information in DT_summary.RData
+    input:  ./data/DT_summary.RData 
+
     
 
        
