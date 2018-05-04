@@ -974,3 +974,92 @@ find_showering <- function(DT) {
   
 }
 
+
+plot_shower_id <- function (i=shower.id, 
+                            DT_sum=DT_summary, 
+                            DT_flows=DT_shower_Flows, 
+                            save.charts=FALSE,
+                            wdc=wd_charts) {
+  # function to plot water flow for one slkmE 
+  # similar to plot_shower() & plot_water(), but plots showers only
+  # i                        - shower.id from DT_summary
+  # DT_sum=DT_summary        - summary information about each shower
+  # DT_flows=DT_shower_Flows - shower interval data
+  # save.charts              - logical to save charts
+  # wdc=wd_charts            - work directory for charts
+  
+  # get the sklmE for 1 shower as a data.table
+  DT_sklmE <- DT_summary[shower.id == i, 
+                         list(shower.id, study, KEYCODE, logging, meter, EventID)]
+  
+  # retrieve interval Flow data for that 1 shower
+  DT_1shower <- DT_shower_Flows[DT_sklmE, 
+                                on = c("study", 
+                                       "KEYCODE", 
+                                       "logging", 
+                                       "meter", 
+                                       "EventID")
+                                ]
+  
+  # set timezone, all these Aquacraft sites are in the Pacific time zone
+  tz="America/Los_Angeles"
+  
+  # convert StartTime to posix times
+  DT_1shower[,date.time:=ymd_hms(StartTime, tz=tz)]
+  
+  # get t_start and t_end
+  t_start <- DT_1shower[,list(t_start = min(date.time))]$t_start
+  t_end   <- DT_1shower[,list(t_end   = max(date.time))]$t_end  
+  
+  # get x-axis breaks and labels
+  span <- dspan(t_start, t_end)
+  
+  # make blank plot
+  p2 <- ggplot(data=DT_1shower ) 
+  
+  # set axis labels for hours
+  p2 <- p2 + scale_x_datetime(limits = c(t_start, t_end), 
+                              date_breaks = span$dbreaks, 
+                              date_labels = span$dlabels)
+  
+  # set limits for y-scale
+  #p2 <- p2 + scale_y_continuous(limits=c(0,5))
+  p2 <- p2 + coord_cartesian(ylim = c(0.01, 5)) 
+  
+  # plot water using blue rectangles
+  p2 <- p2 + geom_rect(aes(xmin = date.time, 
+                           xmax = date.time + dseconds(10), 
+                           ymin = 0, 
+                           ymax = Rate), 
+                       color="deepskyblue", 
+                       fill="deepskyblue") 
+  
+  # labels
+  p2 <- p2 + xlab(paste0(span$xlabel," (hh:mm)")) + 
+    ylab("water flow (GPM) ") 
+  
+  # titles and subtitles
+  plot.title = paste0("Shower ",DT_sklmE$meter," flow for house #", DT_sklmE$KEYCODE)
+  pdate = strftime(t_start, "%a %F")
+  plot.subtitle = paste0('date = ', pdate)
+  p2 <- p2 + ggtitle(bquote(atop(.(plot.title),scriptstyle(.(plot.subtitle))))) 
+  
+  # center the title
+  p2 <- p2 + theme(plot.title = element_text(hjust = 0.5))
+  
+  p2
+  
+  if(save.charts) {
+    # save to (giant) png file
+    ggsave(p2,path=wd_charts,file=paste0('shower_only',k,'_',pdate,".png"),width=10,height=7)
+    # save to (giant) pdf file
+    ggsave(p2,path=wd_charts,file=paste0('shower_only',k,'_',pdate,".pdf"),width=20,height=14)
+    # the PDF format shows the short interval draws.
+  }
+  
+  return(p2)
+}
+
+
+
+
