@@ -90,6 +90,70 @@ p.Tdur <- p.Tdur + ggtitle("distribution of total shower duration") +
                           y = "count of showers")
 p.Tdur
 
+# how many really short showerings
+summary(DT_summary[!is.na(RMSE)]$dur.showering)
+ #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+ # 0.1667  0.5000  4.1667  4.7633  7.1667 31.3333
+
+DT_summary[!is.na(RMSE) & dur.showering < 2,
+           list(nshowerings = length(shower.id)),
+           by=dur.showering][order(dur.showering)]
+#     dur.showering nshowerings
+#  1:     0.1666667         516
+#  2:     0.3333333          92
+#  3:     0.5000000          24
+#  4:     0.6666667          46
+#  5:     0.8333333          18
+#  6:     1.0000000          22
+#  7:     1.1666667          16
+#  8:     1.3333333          19
+#  9:     1.5000000          16
+# 10:     1.6666667          13
+# 11:     1.8333333          20
+
+# this doesn't look good, about 1/5 showerings < 10 secs?
+DT_summary[!is.na(RMSE) & dur.showering <= 1/6, 
+           list(study, KEYCODE, logging, meter, EventID, shower.id,
+                dur.showering, start.showering.time)]
+
+plot_shower_id(4) # this doesn't look good
+plot_shower_id(10)
+plot_shower_id(11)
+plot_shower_id(10)
+plot_shower_id(24)
+plot_shower_id(2431)
+plot_shower_id(2502)
+
+
+
+# histogram of showering duration by logging
+# add treat {pre|post}
+DT_summary.dur.s <- DT_summary[!is.na(RMSE)] # drop 2 or less intervals
+DT_summary.dur.s[logging==1, treat := "pre"]
+DT_summary.dur.s[logging>1,  treat := "post"]
+DT_summary.dur.s <- DT_summary.dur.s[ , list(treat, dur.showering)]
+
+p.dur.s <- ggplot(data = DT_summary.dur.s[])
+p.dur.s <- p.dur.s + geom_freqpoly(data = DT_summary.dur.s[treat=="pre"],
+                                    aes(x=dur.showering, ..density..),
+                                    binwidth = .5, center = .25,
+                                    color = "red", alpha = 0.2,
+                                    position="identity")
+p.dur.s <- p.dur.s + geom_freqpoly(data = DT_summary.dur.s[treat=="post"],
+                                    aes(x=dur.showering, ..density..),
+                                    binwidth = .5, center = .25,
+                                   color = "green", alpha = 0.2,
+                                    position="identity")
+p.dur.s <- p.dur.s + ggtitle("distribution of showering duration") +
+  labs( x="showering duration (mins)",
+        y = "count of showers")
+p.dur.s
+
+
+
+
+
+
 # scatterplot of RMSE vs total duration of shower
 p.RMSEvTdur <- ggplot(data = DT_summary[!is.na(RMSE), 
                                         list(RMSE, 

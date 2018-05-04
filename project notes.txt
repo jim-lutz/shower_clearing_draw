@@ -411,6 +411,12 @@ next steps?
     draws pre and post conservation measures?
     
 2018-05-04
-    build function to plot shower given shower.id        
+    build function to plot shower given shower.id, did that
+    on many showers find_showering() isn't working very well
+    add vertical line at beginnning of showering draw to plot from
+    plot_shower_id()
+    
+    
+           
         
     
