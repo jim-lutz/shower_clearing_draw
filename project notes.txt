@@ -416,6 +416,12 @@ next steps?
     add vertical line at beginnning of showering draw to plot from
     plot_shower_id()
     
+    maybe try first minute of constant flow as start of showering?
+    this automatically excludes anything shorter than one minute
+    have to deal with showers without any minute of constant flow
+    
+    try getting plot_shower_id() to show both hot & cold?
+    
     
            
         
