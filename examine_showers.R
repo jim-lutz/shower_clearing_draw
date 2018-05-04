@@ -16,8 +16,10 @@ load(file = paste0(wd_data,"DT_summary.RData"))
 str(DT_summary)
 
 summary(DT_summary$RMSE)
-#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+#     Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
 # 0.00000 0.08471 0.16273 0.21492 0.29007 1.62256      28 
+# max is > 1 ?
+# 28 NA's
 
 summary(DT_summary$start.draw)
 #                  Min.               1st Qu.                Median 
@@ -27,7 +29,9 @@ summary(DT_summary$start.draw)
 #                  NA's 
 #                  "28" 
 
+# look at distributions
 names(DT_summary)
+
 # drop the ones with missing RMSEs
 DT_p.summary <- DT_summary[!is.na(RMSE), 
                            list(logging,vol.clearing, vol.showering,
@@ -41,11 +45,13 @@ p.spm_shower_clearing <-
               alpha = 0.4),
           columns = 2:7,
           axisLabels="internal",
+          title = "showering and clearing variables",
           lower = list(continuous = "points", combo = "dot_no_facet")
-          )
+  )
 
-ggsave(filename = paste0(wd_charts,"/spm_shower_clearing.png"), plot = p.spm_shower_clearing)
-
+ggsave(filename = paste0(wd_charts,"/spm_shower_clearing.png"), 
+       plot = p.spm_shower_clearing,
+       width = 10.5, height = 9.8)
 
 # boxplots of hourly use by type of use and hour of day
 p <- ggplot(data = DT_mEHW )
