@@ -410,6 +410,7 @@ next steps?
     distribution of difference of showering draws and clearing
     draws pre and post conservation measures?
     
-        
+2018-05-04
+    build function to plot shower given shower.id        
         
     

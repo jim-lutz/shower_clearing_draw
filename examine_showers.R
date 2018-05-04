@@ -53,14 +53,37 @@ ggsave(filename = paste0(wd_charts,"/spm_shower_clearing.png"),
        plot = p.spm_shower_clearing,
        width = 10.5, height = 9.8)
 
-# boxplots of hourly use by type of use and hour of day
-p <- ggplot(data = DT_mEHW )
-p <- p + geom_boxplot( aes(y = hourly.use, x = as.factor(Hr),
-                           fill = factor(type.use), 
-                           color = factor(type.use),
-                           dodge = type.use),
-                       position = position_dodge(width = .7),
-                       varwidth = TRUE)
+rm(DT_p.summary)
+
+
+# distribution plots of RMSE
+p.RMSE <- ggplot(data = DT_summary[!is.na(RMSE)] )
+p.RMSE <- p.RMSE + geom_histogram( aes( x = RMSE ),
+                                   binwidth = .02,
+                                   center = .01)
+p.RMSE <- p.RMSE + 
+  ggtitle("RMS error of of fitting 2-step draw pattern to shower interval data")
+p.RMSE
+
+ggsave(filename = paste0(wd_charts,"/RMSE_shower_fitting.png"), 
+       plot = p.RMSE,
+       width = 10.5, height = 9.8)
+
+# look at plots of some of these showers.
+DT_summary[RMSE==0, list(shower.id)]
+# 21 showers
+
+
+# get sklm for 1 shower as a data.table
+DT_sklm <- DT_summary[shower.id == i, 
+                      list(shower.id, study, KEYCODE, logging, meter, EventID)]
+
+
+
+
+
+
+
 p <- p + scale_fill_manual(values=c("#DDDDFF", "#FFDDDD", "#DDFFDD"),name="use")
 p <- p + scale_color_manual(values=c("#0000FF", "#FF0000", "#00FF00"),name="use")
 p <- p + ggtitle("Hot Water and Electricity Use") + labs(x = "hour", y = "Hourly Use")

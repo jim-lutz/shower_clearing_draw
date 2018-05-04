@@ -100,7 +100,7 @@ examine_showers.R
     # script to examine information in DT_summary.RData
     input:  ./data/DT_summary.RData 
     output: ./charts/spm_shower_clearing.png
-            
+            ./charts/RMSE_shower_fitting.png
 
     
 
