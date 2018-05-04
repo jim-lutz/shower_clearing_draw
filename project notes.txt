@@ -400,10 +400,11 @@ next steps?
     
 2018-05-03
     use summarize_showers.R to build DT_summary.RData
-    loop problems
-    
-    
+    loop problems -- solved
+        
     examine results in DT_summary for plausibility,
+    scatterplot matrix of shower and clearing variables
+    
     plot distribution of rmses? 
     plot distribution of volumes and durations to exclude outliers?
     distribution of difference of showering draws and clearing

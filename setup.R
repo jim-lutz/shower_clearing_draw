@@ -58,6 +58,11 @@ library(lubridate)
 # library(ggplot2)
 # part of tidyverse
 
+# work with GGally
+if(!require(GGally)){install.packages("GGally")}
+library(GGally)
+
+
 # change the default background for ggplot2 to white, not gray
 theme_set( theme_bw() )
 
