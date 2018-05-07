@@ -1087,9 +1087,10 @@ find_showering2 <- function(DT=DT_1shower) {
   
   # warn if not at least one minute of constant flow
   if(max(DT.copy[]$nintervals) < 6 ){
-    warning("less than 1 minute of constant flow")
+    # warning("less than 1 minute of constant flow in shower.id: ", 
+    #           DT.copy[,unique(shower.id)])
     
-    # this isn't going to work
+    # the calculation isn't going to work
     return(NA)
   }
   

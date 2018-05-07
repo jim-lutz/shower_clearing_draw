@@ -31,22 +31,26 @@ DT_summary[,shower.id := 1:nrow(DT_summary)]
 
 # loop through every shower
 # for(i in 1:nrow(DT_summary)) { # actual loop
-# for(i in 1:2 ) { #short loop for debugging only 
-i = 2 #  for development only
+for(i in 1:2 ) { #short loop for debugging only 
+# i = 2 #  for development only
    
   # remove temporary objects if they exist
-  if(exists("DT_sklm")==TRUE) {
+  if(exists("DT_sklmE")==TRUE) {
    # data.tables
-    rm("DT_sklm", "DT_1shower")
-    # lists
-    rm("shower")
+    rm("DT_sklmE", "DT_1shower")
+    
     # values
     rm(".start.draw.time", ".end.draw.time",
-       ".vol.clearing",    ".vol.showering",
-       ".dur.clearing",    ".dur.showering",
-       ".flow.clearing",   ".flow.showering")
+       ".vol.total", ".dur.total", ".start.showering.time")
+    
+    # temporary values that may not exist
+    if(exists(".vol.clearing")) {
+      rm(".vol.clearing",    ".vol.showering",
+         ".dur.clearing",    ".dur.showering",
+         ".flow.clearing",   ".flow.showering")
+      }
     }
-  
+
   # get sklmE for 1 shower as a data.table
   DT_sklmE <- DT_summary[shower.id == i, 
                         list(shower.id, study, KEYCODE, logging, meter, EventID)]
@@ -82,91 +86,48 @@ i = 2 #  for development only
   # calc start.draw and end.draw times for that shower
   .start.draw.time <- min(DT_1shower$date.time)
   .end.draw.time   <- max(DT_1shower$date.time) + dseconds(10)
+  
+  # add calculated values to DT_summary
+  DT_summary[shower.id == i,
+             `:=` (start.draw.time      = .start.draw.time,
+                   end.draw.time        = .end.draw.time,
+                   vol.total            = .vol.total,
+                   dur.total            = .dur.total)
+             ]
    
   # find the start of showering time
   .start.showering.time <- find_showering2(DT_1shower)
   
-  # skip the rest if .start.showering.time not calculated
+  # fill in these if .start.showering.time was calculated
   if(!is.na(.start.showering.time)) {
-  
-  # get the volumes, gallons
-  .vol.clearing  <- DT_1shower[date.time < shower$time, sum(Rate)/6]
-  .vol.showering <- DT_1shower[date.time >= shower$time, sum(Rate)/6]
-   
-  # get durations, minutes
-  .dur.clearing  <- as.numeric(difftime(shower$time, .start.draw.time, units = "mins"),
+    
+    # get the volumes, (gallons)
+    .vol.clearing  <- DT_1shower[date.time < shower$time, sum(Rate)/6]
+    .vol.showering <- DT_1shower[date.time >= shower$time, sum(Rate)/6]
+    
+    # get durations, (minutes)
+    .dur.clearing  <- as.numeric(difftime(.start.showering.time, .start.draw.time, units = "mins"),
                               units = "mins")
-  .dur.showering <- as.numeric(difftime(.end.draw.time, shower$time, units = "mins"),
+    .dur.showering <- as.numeric(difftime(.end.draw.time, .start.showering.time, units = "mins"),
                               units = "mins")
-
-  # get average flow rates, GPM
-  .flow.clearing  <- .vol.clearing / .dur.clearing
-  .flow.showering <- .vol.showering / .dur.showering
-
-  # add calculated values to DT_summary
-  DT_summary[shower.id == i,
-             `:=` (start.draw.time      = .start.draw.time,
-                   start.showering.time = .start.showering.time,
-                   end.draw.time        = .end.draw.time,
-                   vol.total            = .vol.total,
-                   vol.clearing         = .vol.clearing,
-                   vol.showering        = .vol.showering,
-                   dur.total            = .dur.total,
-                   dur.clearing         = .dur.clearing,
-                   dur.showering        = .dur.showering,
-                   flow.clearing        = .flow.clearing,
-                   flow.showering       = .flow.showering)
-             ]
-  } else {
+    
+    # get average flow rates, GPM
+    .flow.clearing  <- .vol.clearing / .dur.clearing
+    .flow.showering <- .vol.showering / .dur.showering
+    
     # add calculated values to DT_summary
     DT_summary[shower.id == i,
-               `:=` (start.draw.time      = .start.draw.time,
-                     start.showering.time = .start.showering.time,
-                     end.draw.time        = .end.draw.time,
-                     vol.total            = .vol.total,
-                     vol.clearing         = NA,
-                     vol.showering        = NA,
-                     dur.total            = .dur.total,
-                     dur.clearing         = NA,
-                     dur.showering        = NA,
-                     flow.clearing        = NA,
-                     flow.showering       = NA)
-               ]
-    
-  }
-
+             `:=` (start.showering.time = .start.showering.time,
+                   vol.total            = .vol.total,
+                   dur.total            = .dur.total)
+             ]
+  } 
 }
 
 # save DT_summary
 save(DT_summary, file = paste0(wd_data,"DT_summary.RData"))
 
 
-# There were 50 or more warnings (use warnings() to see the first 50)
-# > warnings()
-# Warning messages:
-# 1: In rm("shower") : object 'shower' not found
-# 2: In rm(".start.draw.time", ".end.draw.time", ".vol.clearing",  ... :
-#   object '.start.draw.time' not found
-# 3: In rm(".start.draw.time", ".end.draw.time", ".vol.clearing",  ... :
-#   object '.end.draw.time' not found
-
-View(DT_summary)
-
-# look at shower.id ==368
-DT_summary[shower.id == 368,]
-# RMSE:flow.showering NA
-
-# look at flow data
-DT_shower_Flows[DT_summary[shower.id == 368,],
-                on = c("study", 
-                       "KEYCODE", 
-                       "logging", 
-                       "meter", 
-                       "EventID")
-                ]
-# is only 2 records.
-
-# see how many
 DT_summary[is.na(RMSE), 
            list(nshowers = length(shower.id)), 
            by=.(study,KEYCODE,logging,meter)] [order(KEYCODE)]
