@@ -1061,5 +1061,47 @@ plot_shower_id <- function (i=shower.id,
 }
 
 
+find_showering2 <- function(DT=DT_1shower) {
+  # function to find the begining of a showering draw 
+  # given the interval data for one shower
+  # DT = one shower's interval data extracted from DT_shower_Flows.RData
+  # returns the following list:
+  # start.shower$time   time showering draw started, as POSIXct
+  # start.shower$RMSE   RMSE of fitting 2-step draw pattern to interval data
+  
+  # make a copy of DT to avoid modifying original data.table?
+  DT.copy <- copy(DT)
+  
+  # set timezone, all these Aquacraft sites are in the Pacific time zone
+  tz="America/Los_Angeles"
+  
+  # add posix time version of StartTime
+  DT.copy[,date.time:=ymd_hms(StartTime, tz=tz)]
+  
+  # find the time of the maximum flow rate
+  # within the first 5 minutes?
+  max.Rate.time <- DT.copy[1:30,][Rate==max(Rate), date.time]
+  
+  # run length count of identical Rates
+  DT.copy[, nintervals := seq_len(.N), by=rleid(Rate)] 
+  
+  # find the time of first nintervals == 6 
+  # after max.Rate.time 
+  start.shower <-
+    DT.copy[nintervals == 6 & max.Rate.time<date.time,
+            list(start.time = min(date.time))]$start.time
+  
+  # then 50 seconds before that
+  start.shower <- start.shower - dseconds(50)
+  
+  DT.copy[1:25,list(date.time, Rate, nintervals)]
+  
+  # clear up working data.table
+  rm(DT.copy)
+  
+  return(start.shower)  
+  
+}
+
 
 

@@ -102,6 +102,11 @@ examine_showers.R
     output: ./charts/spm_shower_clearing.png
             ./charts/RMSE_shower_fitting.png
 
+build_find_showering2.R
+    # script to build 2nd function to find showering time from shower-only interval data
+    # assumes showers start a beginning of first constant flow minute
+    input:  ./data/DT_shower_Flows.RData
+            ./data/DT_summary.RData 
     
 
        
