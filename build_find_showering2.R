@@ -68,12 +68,14 @@ find_showering2 <- function(DT=DT_1shower) {
   DT.copy[,date.time:=ymd_hms(StartTime, tz=tz)]
   
   # find the time of the maximum flow rate
-  max.Rate.time <- DT.copy[Rate==max(Rate), date.time]
+  # within the first 5 minutes?
+  max.Rate.time <- DT.copy[1:30,][Rate==max(Rate), date.time]
   
   # run length count of identical Rates
   DT.copy[, nintervals := seq_len(.N), by=rleid(Rate)] 
   
-  # find the time of first nintervals == 6 after max.Rate.time
+  # find the time of first nintervals == 6 
+  # after max.Rate.time 
   start.shower <-
   DT.copy[nintervals == 6 & max.Rate.time<date.time,
           list(start.time = min(date.time))]$start.time
@@ -92,6 +94,9 @@ find_showering2 <- function(DT=DT_1shower) {
 
 
 
+find_showering2(DT_1shower)
+names(DT_1shower)
+DT_1shower[,list(StartTime, Rate)]
 
 stop
 
