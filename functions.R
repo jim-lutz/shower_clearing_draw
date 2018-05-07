@@ -1085,6 +1085,14 @@ find_showering2 <- function(DT=DT_1shower) {
   # run length count of identical Rates
   DT.copy[, nintervals := seq_len(.N), by=rleid(Rate)] 
   
+  # warn if not at least one minute of constant flow
+  if(max(DT.copy[]$nintervals) < 6 ){
+    warning("less than 1 minute of constant flow")
+    
+    # this isn't going to work
+    return(NA)
+  }
+  
   # find the time of first nintervals == 6 
   # after max.Rate.time 
   start.shower <-

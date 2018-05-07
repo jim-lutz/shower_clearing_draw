@@ -24,14 +24,14 @@ names(DT_summary)
 # "study", "KEYCODE", "logging", "meter", "EventID", "shower.id" 
 
 plot_shower_id(4) # this doesn't look good
-plot_shower_id(11)
+plot_shower_id(2)
 plot_shower_id(10) # house #13266 total
 plot_shower_id(24) #
 plot_shower_id(2431)
 plot_shower_id(2502)
 
 # try shower.id 2502
-i = 2502
+i = 2
 
 # get sklmE for 1 shower as a data.table
 DT_sklm <- DT_summary[shower.id == i, 
@@ -46,9 +46,6 @@ DT_1shower <- DT_shower_Flows[DT_sklm,
                                      "EventID")
                               ]
 str(DT_1shower)
-
-# for testing function
-#DT = DT_1shower.copy
 
 find_showering2 <- function(DT=DT_1shower) {
   # function to find the begining of a showering draw 
@@ -67,12 +64,20 @@ find_showering2 <- function(DT=DT_1shower) {
   # add posix time version of StartTime
   DT.copy[,date.time:=ymd_hms(StartTime, tz=tz)]
   
-  # find the time of the maximum flow rate
-  # within the first 5 minutes?
-  max.Rate.time <- DT.copy[1:30,][Rate==max(Rate), date.time]
+  # find the first time of the maximum flow rate
+  # within the first 5 minutes
+  max.Rate.time <- min(DT.copy[1:30,][Rate==max(Rate, na.rm = TRUE), date.time])
   
   # run length count of identical Rates
   DT.copy[, nintervals := seq_len(.N), by=rleid(Rate)] 
+  
+  # warn if not at least one minute of constant flow
+  if(max(DT.copy[]$nintervals) < 6 ){
+    stop("less than 1 minute of constant flow")
+  }
+  
+  # warn if maximum rate does not happen before the 1 minute of constant flow
+  # if(DT.copy[])
   
   # find the time of first nintervals == 6 
   # after max.Rate.time 
