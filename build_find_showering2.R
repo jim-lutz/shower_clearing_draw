@@ -64,28 +64,24 @@ find_showering2 <- function(DT=DT_1shower) {
   # set timezone, all these Aquacraft sites are in the Pacific time zone
   tz="America/Los_Angeles"
   
-  # convert StartTime to posix times
+  # add posix time version of StartTime
   DT.copy[,date.time:=ymd_hms(StartTime, tz=tz)]
   
-  # looking for start of first steady flow >= a minute (6 intervals)
-  DT.copy[, nintervals := seq_len(.N), by=rleid(Rate)] # run length count of identical Rate
+  # find the time of the maximum flow rate
+  max.Rate.time <- DT.copy[Rate==max(Rate), date.time]
   
-  # find time of first nintervals == 6
-  start.time <-
-  DT.copy[nintervals == 6 , list(start.time = min(date.time))]$start.time
+  # run length count of identical Rates
+  DT.copy[, nintervals := seq_len(.N), by=rleid(Rate)] 
+  
+  # find the time of first nintervals == 6 after max.Rate.time
+  start.shower <-
+  DT.copy[nintervals == 6 & max.Rate.time<date.time,
+          list(start.time = min(date.time))]$start.time
 
-  DT.copy[1:25,list(date.time, Rate, start.Rate, nintervals)]
+  # then 50 seconds before that
+  start.shower <- start.shower - dseconds(50)
   
-
-    
-  
-  
-  # build list to return
-  start.shower <- list( RMSE = rmse[i],
-                        time = DT.copy[i,date.time] + dseconds(10)
-  )
-  # transition from clearing to showering, at end of interval
-  # as POSIXct
+  DT.copy[1:25,list(date.time, Rate, nintervals)]
   
   # clear up working data.table
   rm(DT.copy)

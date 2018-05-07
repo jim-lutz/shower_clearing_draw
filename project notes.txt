@@ -422,7 +422,9 @@ next steps?
     
     try getting plot_shower_id() to show both hot & cold?
     
-    
+2018-05-07
+    find_showering2 as start of first minute of constant flow rate after
+    the maximum flow rate.    
            
         
     
