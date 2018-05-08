@@ -82,17 +82,67 @@ ggsave(filename = paste0(wd_charts,"/small.vol.total.png"),
 DT_summary[vol.total<1][order(vol.total)]
 
 DT_shower_Flows[shower.id==413]
-plot_shower_id(i=413, 
-               DT_sum=DT_summary, 
-               DT_flows=DT_shower_Flows)
-
+plot_shower_id(i=413)
 
 # load DT_shower_interval4.RData, 
 load(file = paste0(wd_data,"DT_shower_interval4.RData"))
 
-# look at all shower water
-plot_water(s="Seattle", l=2, k=13219, DT=DT_shower_interval4, 
-           t1="2000-04-05 19:00:00", t2="2000-04-05 19:15:00" )
+plot_water_id(i=413)
+# not likely a shower
+
+DT_shower_Flows[shower.id==2025]
+plot_shower_id(2025)
+plot_water_id(2025)
+# maybe at 17:12, but not at 17:15
+
+# examine the small showers, vol.total 1 - 2
+DT_summary[1<vol.total & vol.total<2][order(vol.total)]
+
+DT_shower_Flows[shower.id==1554]
+plot_shower_id(1554)
+plot_water_id(1554)
+# maybe a shower with something else?
+
+DT_shower_Flows[shower.id==1367, list(StartTime,Rate,meter)]
+plot_shower_id(1367)
+plot_water_id(1367)
+# no there's more hot water than total water for several intervals
+
+DT_shower_Flows[shower.id==1258]
+plot_shower_id(1258)
+plot_water_id(1258)
+# maybe a shower with something else in the middle, not categorized correctly
+
+# examine the small showers, vol.total 2 < 3
+DT_summary[2<vol.total & vol.total<3][order(vol.total)]
+
+# sample some of those showers
+DT_shower_Flows[shower.id==1179, list(StartTime,Rate,meter)]
+plot_shower_id(1179)
+plot_water_id(1179)
+# maybe, but something else is going on over it
+
+DT_shower_Flows[shower.id==1260, list(StartTime,Rate,meter)]
+plot_shower_id(1260)
+plot_water_id(1260)
+# probably is
+
+DT_shower_Flows[shower.id==262, list(StartTime,Rate,meter)]
+plot_shower_id(262)
+plot_water_id(262)
+# probably, one minute constant flow may not detect showering start though
+
+DT_shower_Flows[shower.id==1633, list(StartTime,Rate,meter)]
+plot_shower_id(1633)
+plot_water_id(1633)
+# hot yes, total has something else
+
+DT_shower_Flows[shower.id==1485, list(StartTime,Rate,meter)]
+plot_shower_id(1485)
+plot_water_id(1485)
+# yes
+
+check Rate on plot_water_id()? it looks too high
 
 
 

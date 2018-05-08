@@ -1113,4 +1113,33 @@ find_showering2 <- function(DT=DT_1shower) {
 }
 
 
+plot_water_id <- function(i=shower.id, DTf = DT_shower_Flows, 
+                          DTi = DT_shower_interval4) {
+  # plot water by shower.id for 5 minutes before and after shower
+  # mostly a wrapper for plot_water
+  # i     = shower.id
+  # DTf   = DT_shower_Flows
+  #         this is to get information about the shower
+  # DTi   = DT_shower_interval4
+  #         this is to find the Flow files
+  
+  # get inputs for plot_water()
+  DTskl <-
+    DTf[shower.id == i, list(.s = unique(study),
+                             .k = unique(KEYCODE),
+                             .l = unique(logging),
+                             .t1 = as.character(min(date.time)-dminutes(5)),
+                             .t2 = as.character(max(date.time)+dminutes(5)))
+        ]
+  
+  # call plot_water()
+  plot_water(s=DTskl$.s, 
+             l=DTskl$.l, 
+             k=DTskl$.k,
+             t1=DTskl$.t1, 
+             t2=DTskl$.t2, 
+             DT=DT_shower_interval4)
+  
+}
+
 
