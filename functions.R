@@ -207,7 +207,7 @@ dspan <- function(t_start, t_end) {
   span = as.numeric(as.duration(interval(t_start, t_end)))/60 # minutes
   
   # pick appropriate breaks and labels from size of span
-  if(span>0)             {dbreaks = "1 min";         dlabels = "%H:%M" ; xlabel="time"}
+  if(span>=0)            {dbreaks = "1 min";         dlabels = "%H:%M" ; xlabel="time"}
   if(span>10)            {dbreaks = "2 mins";        dlabels = "%H:%M" }
   if(span>30)            {dbreaks = "5 mins";        dlabels = "%H:%M" }
   if(span>60)            {dbreaks = "20 mins";       dlabels = "%H:%M" }

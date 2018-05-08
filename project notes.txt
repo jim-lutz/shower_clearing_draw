@@ -426,5 +426,9 @@ next steps?
     find_showering2 as start of first minute of constant flow rate after
     the maximum flow rate.    
            
+2018-05-08
+    put shower.id into DT_shower_Flows to calculate vol.total and dur.total.
+    distributions show many small showers. 82 where vol.total < 1 gal?
+    will have to exclude some of them
         
     

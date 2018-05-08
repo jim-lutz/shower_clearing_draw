@@ -29,9 +29,81 @@ DT_summary <-
 # add an shower index number to showers for ease of looping
 DT_summary[,shower.id := 1:nrow(DT_summary)]
 
+# put shower.id into DT_shower_Flows
+DT_shower_Flows[DT_summary, shower.id := i.shower.id,
+                on = c("study", "KEYCODE", "logging", "meter", "EventID")
+                ]
+
+# get vol.total and dur.total
+DT_totals <-
+DT_shower_Flows[ , list(vol.total = sum(Rate)/6,
+                        dur.total = as.numeric(difftime(max(date.time),
+                                                        min(date.time),
+                                                        units = "mins")
+                                               ) + 1/6 # include the full duration of the last interval
+                        ), by=shower.id ]
+
+# add totals to DT_summary
+DT_summary[ DT_totals, `:=` (vol.total = i.vol.total,
+                             dur.total = i.dur.total),
+            on= "shower.id"]
+
+# look at distribution of vol.total
+p.vol.total <- ggplot(data = DT_summary[] )
+p.vol.total <- p.vol.total + geom_histogram( aes( x = vol.total ),
+                                             binwidth = 1,
+                                             center = .5)
+
+p.vol.total <- p.vol.total + 
+  ggtitle("count of showers (both hot and total water) by volume") +
+  labs(x = "total volume (gal)")
+p.vol.total
+
+ggsave(filename = paste0(wd_charts,"/vol.total.png"), 
+       plot = p.vol.total,
+       width = 10.5, height = 9.8)
+
+# zoom in on small showers
+p.small.vol.total <- ggplot(data = DT_summary[vol.total<5] )
+p.small.vol.total <- p.small.vol.total + geom_histogram( aes( x = vol.total ),
+                                             binwidth = .25,
+                                             center = .125)
+
+p.small.vol.total <- p.small.vol.total + 
+  ggtitle("count of small showers (both hot and total water) by volume") +
+  labs(x = "total volume (gal)")
+p.small.vol.total
+
+ggsave(filename = paste0(wd_charts,"/small.vol.total.png"), 
+       plot = p.small.vol.total,
+       width = 10.5, height = 9.8)
+
+# examine the small showers, vol.total <1
+DT_summary[vol.total<1][order(vol.total)]
+
+DT_shower_Flows[shower.id==413]
+plot_shower_id(i=413, 
+               DT_sum=DT_summary, 
+               DT_flows=DT_shower_Flows)
+
+
+# load DT_shower_interval4.RData, 
+load(file = paste0(wd_data,"DT_shower_interval4.RData"))
+
+# look at all shower water
+plot_water(s="Seattle", l=2, k=13219, DT=DT_shower_interval4, 
+           t1="2000-04-05 19:00:00", t2="2000-04-05 19:15:00" )
+
+
+
+
+
+
+
+
 # loop through every shower
-# for(i in 1:nrow(DT_summary)) { # actual loop
-for(i in 1:2 ) { #short loop for debugging only 
+for(i in 1:nrow(DT_summary)) { # actual loop
+# for(i in 1:2 ) { #short loop for debugging only 
 # i = 2 #  for development only
    
   # remove temporary objects if they exist
