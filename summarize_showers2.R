@@ -142,19 +142,132 @@ plot_shower_id(1485)
 plot_water_id(1485)
 # yes
 
-check Rate on plot_water_id()? it looks too high
+i=1485
+# check Rate on plot_water_id()? it looks too high
+# plot_water_id() Rate looks OK out of 
+# tw_file = /home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/Aquacraft/EBMUD/Pre Retrofit/22027.tdb
+
+DT_shower_Flows[shower.id==1485, list(StartTime,Rate)]
+DT_tw_flows[ymd_hms("2001-02-20 13:26:35",tz=tz)<= date.time &
+            date.time <= ymd_hms("2001-02-20 13:30:45",tz=tz),
+            list(date.time,Rate)]
+DT_shower_Flows[shower.id==1485]
+# something else is flowing then?
+
+DT_shower_Flows[shower.id==1319, list(StartTime,Rate,meter)]
+plot_shower_id(1319)
+plot_water_id(1319)
+# probably OK
+
+# maybe limit to showers vol.total >2.5
+
+# look at scatter plot of vol.total vs dur.total
+p.dv.total <- ggplot(data = DT_summary[] )
+p.dv.total <- p.dv.total + geom_point( aes( x = vol.total, y=dur.total ))
+
+p.dv.total <- p.dv.total + 
+  ggtitle("count of showers (both hot and total water) by volume") +
+  labs(x = "total volume (gal)")
+p.dv.total
+
+ggsave(filename = paste0(wd_charts,"/durvol.total.png"), 
+       plot = p.dv.total,
+       width = 10.5, height = 9.8)
+
+
+# zoomed in look at scatter plot of vol.total vs dur.total
+p.zdv.total <- ggplot(data = DT_summary[2.5 < vol.total & 
+                                          vol.total < 20 &
+                                          dur.total < 10] )
+p.zdv.total <- p.zdv.total + geom_jitter( aes( x = vol.total, y=dur.total),
+                                              shape = "circle")
+p.zdv.total
+
+# examing short showers
+DT_summary[vol.total >2.5 & dur.total < 2.5 ][order(dur.total)]
+
+DT_shower_Flows[shower.id==1398 , list(StartTime,Rate,meter)]
+plot_shower_id(1398 )
+plot_water_id(1398 )
+# probably not
+
+DT_shower_Flows[shower.id==356 ]
+DT_shower_Flows[shower.id==356, list(StartTime,Rate)]
+plot_shower_id(356 )
+# maybe
+plot_water_id(356 ) # missing hot water?
+
+DT_shower_Flows[shower.id==584, list(StartTime,Rate, meter)]
+plot_shower_id(584 )
+plot_water_id(584 ) 
+# no hot water?
+
+DT_shower_Flows[shower.id==97, list(StartTime,Rate, meter)]
+plot_shower_id(97 )
+plot_water_id(97 ) 
+# something else going on, probably not shower
+
+
+DT_shower_Flows[shower.id==717, list(StartTime,Rate, meter)]
+plot_shower_id(717 )
+plot_water_id(717 ) 
+# 3.955000 2.0000000 maybe
+
+# 311 10.128333 2.1666667
+DT_shower_Flows[shower.id==311, list(StartTime,Rate, meter)]
+plot_shower_id(311 )
+plot_water_id(311 ) 
+# maybe not?
+
+# 2500  3.011667 2.3333333
+DT_shower_Flows[shower.id==2500, list(StartTime,Rate, meter)]
+plot_shower_id(2500 )
+plot_water_id(2500 ) 
+# probably
+
+# stick w/ dur.total > 2.5
 
 
 
+# examine the long showers, dur.total >30
+DT_summary[dur.total >30][order(-dur.total)]
 
 
+DT_shower_Flows[shower.id==2449, list(StartTime,Rate,meter)]
+plot_shower_id(2449)
+plot_water_id(2449)
+# probably
 
 
+DT_shower_Flows[shower.id==2504, list(StartTime,Rate,meter)]
+plot_shower_id(2504)
+plot_water_id(2504)
+# hot water side of 2449
 
-# loop through every shower
-for(i in 1:nrow(DT_summary)) { # actual loop
-# for(i in 1:2 ) { #short loop for debugging only 
-# i = 2 #  for development only
+
+# look at scatter plot of trimmed vol.total vs dur.total
+p.trmdv.total <- ggplot(data = DT_summary[dur.total > 2.5 & vol.total > 2.5] )
+p.trmdv.total <- p.trmdv.total + geom_jitter( aes( x = vol.total, y=dur.total),
+                                             shape = "circle")
+
+p.trmdv.total <- p.trmdv.total + 
+  ggtitle("count of showers (both hot and total water) by volume",
+          subtitle = "volume > 2.5 gal & duration > 2.5 min") +
+  labs(x = "total volume (gal)")
+p.trmdv.total
+
+ggsave(filename = paste0(wd_charts,"/trim.durvol.total.png"), 
+       plot = p.trmdv.total,
+       width = 10.5, height = 9.8)
+
+# exclude too short & too small
+DT_summary <- DT_summary[dur.total > 2.5 & vol.total > 2.5]
+# from 2507 to 2256
+
+# loop through every shower.id
+for(i in DT_summary[,shower.id]) { # actual loop
+# for(i in 3:6 ) { #short loop for debugging only 
+# i = 3 #  for development only
    
   # remove temporary objects if they exist
   if(exists("DT_sklmE")==TRUE) {
@@ -178,7 +291,7 @@ for(i in 1:nrow(DT_summary)) { # actual loop
                         list(shower.id, study, KEYCODE, logging, meter, EventID)]
   
   # report status 
-  cat('\r',sprintf("shower.id = %4i, study=%7s, KEYCODE=%5i, logging=%d, meter=%11s, EventID=%4i",
+  cat(sprintf("\rshower.id = %4i, study=%7s, KEYCODE=%5i, logging=%d, meter=%11s, EventID=%4i",
                    DT_sklmE$shower.id,
                    DT_sklmE$study,
                    DT_sklmE$KEYCODE,
@@ -219,6 +332,12 @@ for(i in 1:nrow(DT_summary)) { # actual loop
    
   # find the start of showering time
   .start.showering.time <- find_showering2(DT_1shower)
+
+  DT_shower_Flows[shower.id==3, list(StartTime,Rate,meter)]
+  plot_shower_id(3)
+  plot_water_id(3)
+  
+  
   
   # fill in these if .start.showering.time was calculated
   if(!is.na(.start.showering.time)) {

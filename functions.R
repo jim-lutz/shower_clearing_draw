@@ -1094,14 +1094,14 @@ find_showering2 <- function(DT=DT_1shower) {
     return(NA)
   }
   
-  # find the time of first nintervals == 6 
+  # find the time of first nintervals == 3 
   # after max.Rate.time 
   start.shower <-
-    DT.copy[nintervals == 6 & max.Rate.time<date.time,
+    DT.copy[nintervals == 3 & max.Rate.time<date.time,
             list(start.time = min(date.time))]$start.time
   
-  # then 50 seconds before that
-  start.shower <- start.shower - dseconds(50)
+  # then 20 seconds before that
+  start.shower <- start.shower - dseconds(20)
   
   DT.copy[1:25,list(date.time, Rate, nintervals)]
   
