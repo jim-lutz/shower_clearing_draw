@@ -437,5 +437,11 @@ next steps?
     max flow rate in first 5 minutes
     
     
+    /media/jiml/My Book/y/completed/CECHW2 500-06-036/Task 2.1.1 Collect Supporting Information for the 2008 Title 24 Standards Development Process/Hot Water Draw Patterns/studies
+
+2018-05-09
+    https://cran.r-project.org/doc/FAQ/R-FAQ.html#How-can-R-be-installed-_0028Unix_002dlike_0029
     
+    got vol.clearing boxplots, do some extras, width, notches, edit labels, center titles
+    then repear for vol.showering
     
