@@ -14,9 +14,15 @@ source("functions.R")
 # load DT_summary.RData, this is the shower summary data
 load(file = paste0(wd_data,"DT_summary.RData"))
 str(DT_summary)
-
-# look at distributions
 names(DT_summary)
+
+# center the titles
+theme_update(plot.title = element_text(hjust = 0.5))
+
+# skip if working on later plots
+skip = TRUE
+
+if(!skip){
 
 # look at scatterplot matrix of showering and clearing variables
 p.spm_showering_clearing2 <-
@@ -33,6 +39,7 @@ ggsave(filename = paste0(wd_charts,"/spm_shower_clearing2.png"),
        plot = p.spm_shower_clearing2,
        width = 10.5, height = 9.8)
 
+} # end of skip
 
 # boxplots of volume of clearing draws by KEYCODE and logging
 p.box.volclearing <- ggplot(data = DT_summary[] )
@@ -41,16 +48,17 @@ p.box.volclearing <- p.box.volclearing +
                                            y = vol.clearing,
                                            fill = as.factor(logging)
                                            ),
+                                      notch = TRUE,
+                                      varwidth = TRUE,
                                       show.legend = FALSE
                                       )
 p.box.volclearing <- p.box.volclearing + 
-                      facet_wrap(~KEYCODE, nrow = 2)
+                      facet_wrap(~KEYCODE, nrow = 4)
   
 p.box.volclearing <- p.box.volclearing + 
-  ggtitle("clearing draws by house", 
-          subtitle = "pre- & post- shower head install") +
+  ggtitle("shower clearing draws by house") +
   labs(y = "clearing draw volume (gal)",
-       x = "before (1) and after installation(2,3)")
+       x = "before (1) and after showerhead installation (2,3)")
 
 p.box.volclearing
 
