@@ -264,10 +264,12 @@ ggsave(filename = paste0(wd_charts,"/trim.durvol.total.png"),
 DT_summary <- DT_summary[dur.total > 2.5 & vol.total > 2.5]
 # from 2507 to 2256
 
+
 # loop through every shower.id
+# --- --- --- ---
 for(i in DT_summary[,shower.id]) { # actual loop
 # for(i in 3:6 ) { #short loop for debugging only 
-# i = 3 #  for development only
+# i = 6 #  for development only
    
   # remove temporary objects if they exist
   if(exists("DT_sklmE")==TRUE) {
@@ -333,18 +335,18 @@ for(i in DT_summary[,shower.id]) { # actual loop
   # find the start of showering time
   .start.showering.time <- find_showering2(DT_1shower)
 
-  DT_shower_Flows[shower.id==3, list(StartTime,Rate,meter)]
-  plot_shower_id(3)
-  plot_water_id(3)
-  
+  # DT_shower_Flows[shower.id==6, list(StartTime,Rate,meter)]
+  # plot_shower_id(6)
+  # plot_water_id(6)
+  # 
   
   
   # fill in these if .start.showering.time was calculated
   if(!is.na(.start.showering.time)) {
     
     # get the volumes, (gallons)
-    .vol.clearing  <- DT_1shower[date.time < shower$time, sum(Rate)/6]
-    .vol.showering <- DT_1shower[date.time >= shower$time, sum(Rate)/6]
+    .vol.clearing  <- DT_1shower[date.time < .start.showering.time, sum(Rate)/6]
+    .vol.showering <- DT_1shower[date.time >= .start.showering.time, sum(Rate)/6]
     
     # get durations, (minutes)
     .dur.clearing  <- as.numeric(difftime(.start.showering.time, .start.draw.time, units = "mins"),
@@ -359,8 +361,12 @@ for(i in DT_summary[,shower.id]) { # actual loop
     # add calculated values to DT_summary
     DT_summary[shower.id == i,
              `:=` (start.showering.time = .start.showering.time,
-                   vol.total            = .vol.total,
-                   dur.total            = .dur.total)
+                   vol.clearing         = .vol.clearing,
+                   vol.showering        = .vol.showering,
+                   dur.clearing         = .dur.clearing,
+                   dur.showering        = .dur.showering,
+                   flow.clearing        = .flow.clearing,
+                   flow.showering        = .flow.showering)
              ]
   } 
 }

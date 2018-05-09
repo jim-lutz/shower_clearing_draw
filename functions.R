@@ -1067,27 +1067,20 @@ find_showering2 <- function(DT=DT_1shower) {
   # DT = one shower's interval data extracted from DT_shower_Flows.RData
   # returns the following list:
   # start.shower$time   time showering draw started, as POSIXct
-  # start.shower$RMSE   RMSE of fitting 2-step draw pattern to interval data
-  
+
   # make a copy of DT to avoid modifying original data.table?
   DT.copy <- copy(DT)
   
-  # set timezone, all these Aquacraft sites are in the Pacific time zone
-  tz="America/Los_Angeles"
-  
-  # add posix time version of StartTime
-  DT.copy[,date.time:=ymd_hms(StartTime, tz=tz)]
-  
-  # find the time of the maximum flow rate
+  # find the first time of the maximum flow rate
   # within the first 5 minutes?
-  max.Rate.time <- DT.copy[1:30,][Rate==max(Rate), date.time]
+  max.Rate.time <- min(DT.copy[1:30,][Rate==max(Rate, na.rm = TRUE), date.time])
   
   # run length count of identical Rates
   DT.copy[, nintervals := seq_len(.N), by=rleid(Rate)] 
   
   # warn if not at least one minute of constant flow
-  if(max(DT.copy[]$nintervals) < 6 ){
-    # warning("less than 1 minute of constant flow in shower.id: ", 
+  if(max(DT.copy[]$nintervals) < 3 ){
+    # warning("less than 30 seconds of constant flow in shower.id: ", 
     #           DT.copy[,unique(shower.id)])
     
     # the calculation isn't going to work
