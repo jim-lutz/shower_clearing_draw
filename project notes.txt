@@ -443,5 +443,14 @@ next steps?
     https://cran.r-project.org/doc/FAQ/R-FAQ.html#How-can-R-be-installed-_0028Unix_002dlike_0029
     
     got vol.clearing boxplots, do some extras, width, notches, edit labels, center titles
-    then repear for vol.showering
+    then repeat for vol.showering
+    
+    got good boxplot showering|clearing volume|duration
+    savings on showering volume, not so clear signal on clearing or duration
+    
+    need to look for info about diff logging 2,3 and about houses (vintage, npeople, sqft)
+    
+    maybe histograms of distributions?
+    
+    
     

@@ -19,13 +19,29 @@ names(DT_summary)
 # center the titles
 theme_update(plot.title = element_text(hjust = 0.5))
 
-# skip if working on later plots
-skip = TRUE
-
-if(!skip){
-
-# look at scatterplot matrix of showering and clearing variables
-p.spm_showering_clearing2 <-
+# which plots to run
+# ----
+# set to FALSE if working on later plots
+# scatterplot matrix of showering and clearing variables
+  run.spm = FALSE  
+# boxplots of volume of clearing draws by logging, KEYCODE, and meter
+  run.box.clearing = FALSE 
+# boxplots of volume of showering draws by logging, KEYCODE, and meter
+  run.box.showering  = FALSE 
+# boxplots of duration of showering draws by logging, KEYCODE, and meter
+  run.box.dur.showering  = TRUE 
+# boxplots of duration of clearing draws by logging, KEYCODE, and meter
+  run.box.dur.clearing  = TRUE 
+  
+  # ----
+  
+  
+# blocks of code to generate plots
+# ----
+  
+# scatterplot matrix of showering and clearing variables
+if(run.spm){
+  p.spm_showering_clearing2 <-
   ggpairs(DT_summary[ , L := as.factor(logging)], 
           aes(colour = L,
               alpha = 0.4),
@@ -39,9 +55,10 @@ ggsave(filename = paste0(wd_charts,"/spm_shower_clearing2.png"),
        plot = p.spm_shower_clearing2,
        width = 10.5, height = 9.8)
 
-} # end of skip
+} # end of scatterplot matrix of showering and clearing variables
 
-# boxplots of volume of clearing draws by KEYCODE and logging
+# boxplots of volume of clearing draws by logging, KEYCODE, and meter
+if(run.box.clearing) {
 p.box.volclearing <- ggplot(data = DT_summary[] )
 p.box.volclearing <- p.box.volclearing + 
                         geom_boxplot( aes( x = as.factor(logging), 
@@ -52,9 +69,7 @@ p.box.volclearing <- p.box.volclearing +
                                       varwidth = TRUE,
                                       show.legend = FALSE
                                       )
-p.box.volclearing <- p.box.volclearing + 
-                      facet_wrap(~KEYCODE, nrow = 4)
-  
+
 p.box.volclearing <- p.box.volclearing + 
   ggtitle("shower clearing draws by house") +
   labs(y = "clearing draw volume (gal)",
@@ -62,108 +77,175 @@ p.box.volclearing <- p.box.volclearing +
 
 p.box.volclearing
 
-ggsave(filename = paste0(wd_charts,"/box.volclearing.png"), 
+ggsave(filename = paste0(wd_charts,"/all.box.volclearing.png"), 
        plot = p.box.volclearing,
        width = 10.5, height = 9.8)
 
+# by KEYCODE
+p.box.volclearing.KEYCODE <- p.box.volclearing + 
+  facet_wrap(~KEYCODE, nrow = 4)
 
-XXXXXXXX
+p.box.volclearing.KEYCODE
 
-# look at plots of some of these showers.
-DT_summary[RMSE==0, list(shower.id)]
-# 21 showers
+ggsave(filename = paste0(wd_charts,"/box.volclearing.KEYCODE.png"), 
+       plot = p.box.volclearing.KEYCODE,
+       width = 10.5, height = 9.8)
 
-# histogram of total duration of shower
-p.Tdur <- ggplot(data = DT_summary[!is.na(RMSE), 
-                                        list(Tdur= dur.clearing + dur.showering)
-                                        ] 
-                      )
-p.Tdur <- p.Tdur + geom_histogram( aes(x=Tdur),
-                                   binwidth = .5,
-                                   center = .25)
-p.Tdur <- p.Tdur + ggtitle("distribution of total shower duration") +
-                    labs( x="total shower duration (mins)",
-                          y = "count of showers")
-p.Tdur
+# by meter
+p.box.volclearing.meter <- p.box.volclearing + 
+  facet_wrap(~meter, nrow = 4)
 
-# how many really short showerings
-summary(DT_summary[!is.na(RMSE)]$dur.showering)
- #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
- # 0.1667  0.5000  4.1667  4.7633  7.1667 31.3333
+p.box.volclearing.meter
 
-DT_summary[!is.na(RMSE) & dur.showering < 2,
-           list(nshowerings = length(shower.id)),
-           by=dur.showering][order(dur.showering)]
-#     dur.showering nshowerings
-#  1:     0.1666667         516
-#  2:     0.3333333          92
-#  3:     0.5000000          24
-#  4:     0.6666667          46
-#  5:     0.8333333          18
-#  6:     1.0000000          22
-#  7:     1.1666667          16
-#  8:     1.3333333          19
-#  9:     1.5000000          16
-# 10:     1.6666667          13
-# 11:     1.8333333          20
+ggsave(filename = paste0(wd_charts,"/box.volclearing.meter.png"), 
+       plot = p.box.volclearing.meter,
+       width = 10.5, height = 9.8)
 
-# this doesn't look good, about 1/5 showerings < 10 secs?
-DT_summary[!is.na(RMSE) & dur.showering <= 1/6, 
-           list(study, KEYCODE, logging, meter, EventID, shower.id,
-                dur.showering, start.showering.time)]
+} # end of boxplots of volume of clearing draws by logging, KEYCODE, and meter
 
-plot_shower_id(4) # this doesn't look good
-plot_shower_id(10)
-plot_shower_id(11)
-plot_shower_id(10)
-plot_shower_id(24)
-plot_shower_id(2431)
-plot_shower_id(2502)
+# boxplots of volume of showering draws by logging, KEYCODE, and meter
+if(run.box.showering) {  
+p.box.volshowering <- ggplot(data = DT_summary[] )
 
+p.box.volshowering <- p.box.volshowering + 
+  geom_boxplot( aes( x = as.factor(logging), 
+                     y = vol.showering,
+                     fill = as.factor(logging)
+                     ),
+                notch = TRUE,
+                varwidth = TRUE,
+                show.legend = FALSE
+              )
 
+p.box.volshowering <- p.box.volshowering + 
+  ggtitle("shower showering draws by house") +
+  labs(y = "showering draw volume (gal)",
+       x = "before (1) and after showerhead installation (2,3)")
 
-# histogram of showering duration by logging
-# add treat {pre|post}
-DT_summary.dur.s <- DT_summary[!is.na(RMSE)] # drop 2 or less intervals
-DT_summary.dur.s[logging==1, treat := "pre"]
-DT_summary.dur.s[logging>1,  treat := "post"]
-DT_summary.dur.s <- DT_summary.dur.s[ , list(treat, dur.showering)]
+p.box.volshowering
 
-p.dur.s <- ggplot(data = DT_summary.dur.s[])
-p.dur.s <- p.dur.s + geom_freqpoly(data = DT_summary.dur.s[treat=="pre"],
-                                    aes(x=dur.showering, ..density..),
-                                    binwidth = .5, center = .25,
-                                    color = "red", alpha = 0.2,
-                                    position="identity")
-p.dur.s <- p.dur.s + geom_freqpoly(data = DT_summary.dur.s[treat=="post"],
-                                    aes(x=dur.showering, ..density..),
-                                    binwidth = .5, center = .25,
-                                   color = "green", alpha = 0.2,
-                                    position="identity")
-p.dur.s <- p.dur.s + ggtitle("distribution of showering duration") +
-  labs( x="showering duration (mins)",
-        y = "count of showers")
-p.dur.s
+ggsave(filename = paste0(wd_charts,"/all.box.volshowering.png"), 
+       plot = p.box.volshowering,
+       width = 10.5, height = 9.8)
+
+# by KEYCODE
+p.box.volshowering.KEYCODE <- p.box.volshowering + 
+  facet_wrap(~KEYCODE, nrow = 4)
+
+p.box.volshowering.KEYCODE
+
+ggsave(filename = paste0(wd_charts,"/box.volshowering.KEYCODE.png"), 
+       plot = p.box.volshowering.KEYCODE,
+       width = 10.5, height = 9.8)
 
 
+# by meter
+p.box.volshowering.meter <- p.box.volshowering + 
+  facet_wrap(~meter, nrow = 2)
 
+p.box.volshowering.meter
 
+ggsave(filename = paste0(wd_charts,"/box.volshowering.meter.png"), 
+       plot = p.box.volshowering.meter,
+       width = 10.5, height = 9.8)
 
+} # end of boxplots of volume of clearing draws by logging, KEYCODE, and meter
 
-# scatterplot of RMSE vs total duration of shower
-p.RMSEvTdur <- ggplot(data = DT_summary[!is.na(RMSE), 
-                                        list(RMSE, 
-                                             Tdur= dur.clearing + dur.showering)
-                                        ]
-                      )
+# boxplots of duration of showering draws by logging, KEYCODE, and meter
+if(run.box.dur.showering) {  
+    p.box.durshowering <- ggplot(data = DT_summary[] )
+    
+    p.box.durshowering <- p.box.durshowering + 
+      geom_boxplot( aes( x = as.factor(logging), 
+                         y = dur.showering,
+                         fill = as.factor(logging)),
+                    notch = TRUE,
+                    varwidth = TRUE,
+                    show.legend = FALSE
+                    )
+    
+    p.box.durshowering <- p.box.durshowering + 
+      ggtitle("shower showering draws by house") +
+      labs(y = "showering draw duration (min)",
+           x = "before (1) and after showerhead installation (2,3)")
+    
+    p.box.durshowering
+    
+    ggsave(filename = paste0(wd_charts,"/all.box.durshowering.png"), 
+           plot = p.box.durshowering,
+           width = 10.5, height = 9.8)
+    
+    # by KEYCODE
+    p.box.durshowering.KEYCODE <- p.box.durshowering + 
+      facet_wrap(~KEYCODE, nrow = 4)
+    
+    p.box.durshowering.KEYCODE
+    
+    ggsave(filename = paste0(wd_charts,"/box.durshowering.KEYCODE.png"), 
+           plot = p.box.durshowering.KEYCODE,
+           width = 10.5, height = 9.8)
+    
+    
+    # by meter
+    p.box.durshowering.meter <- p.box.durshowering + 
+      facet_wrap(~meter, nrow = 2)
+    
+    p.box.durshowering.meter
+    
+    ggsave(filename = paste0(wd_charts,"/box.durshowering.meter.png"), 
+           plot = p.box.durshowering.meter,
+           width = 10.5, height = 9.8)
+    
+  } # end of boxplots of duration of showering draws by logging, KEYCODE, and meter
 
-p.RMSEvTdur <- p.RMSEvTdur + 
-                    geom_point(aes(x=Tdur, y=RMSE)) +
-                    labs( x="total shower duration (mins)")
-p.RMSEvTdur
+# boxplots of duration of clearing draws by logging, KEYCODE, and meter
+if(run.box.dur.clearing) {  
+    p.box.durclearing <- ggplot(data = DT_summary[] )
+    
+    p.box.durclearing <- p.box.durclearing + 
+      geom_boxplot( aes( x = as.factor(logging), 
+                         y = dur.clearing,
+                         fill = as.factor(logging)),
+                    notch = TRUE,
+                    varwidth = TRUE,
+                    show.legend = FALSE
+      )
+    
+    p.box.durclearing <- p.box.durclearing + 
+      ggtitle("shower clearing draws by house") +
+      labs(y = "clearing draw duration (min)",
+           x = "before (1) and after showerhead installation (2,3)")
+    
+    p.box.durclearing
+    
+    ggsave(filename = paste0(wd_charts,"/all.box.durclearing.png"), 
+           plot = p.box.durclearing,
+           width = 10.5, height = 9.8)
+    
+    # by KEYCODE
+    p.box.durclearing.KEYCODE <- p.box.durclearing + 
+      facet_wrap(~KEYCODE, nrow = 4)
+    
+    p.box.durclearing.KEYCODE
+    
+    ggsave(filename = paste0(wd_charts,"/box.durclearing.KEYCODE.png"), 
+           plot = p.box.durclearing.KEYCODE,
+           width = 10.5, height = 9.8)
+    
+    
+    # by meter
+    p.box.durclearing.meter <- p.box.durclearing + 
+      facet_wrap(~meter, nrow = 2)
+    
+    p.box.durclearing.meter
+    
+    ggsave(filename = paste0(wd_charts,"/box.durclearing.meter.png"), 
+           plot = p.box.durclearing.meter,
+           width = 10.5, height = 9.8)
+    
+  } # end of boxplots of duration of clearing draws by logging, KEYCODE, and meter
+  
+  
+  
 
-
-
-
-plot_shower_id(1631)
 
