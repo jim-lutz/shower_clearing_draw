@@ -107,6 +107,13 @@ build_find_showering2.R
     # assumes showers start a beginning of first constant flow minute
     input:  ./data/DT_shower_Flows.RData
             ./data/DT_summary.RData 
+
+summarize_showers2.R
+    # script to summarize information on clearing/showering draws for all showers.
+ 	# uses find_showering2()
+    input:  ./data/DT_shower_Flows.RData
+            ./data/DT_summary.RData 
+    output: ./data/DT_summary.RData (new)
     
 
        

@@ -430,5 +430,12 @@ next steps?
     put shower.id into DT_shower_Flows to calculate vol.total and dur.total.
     distributions show many small showers. 82 where vol.total < 1 gal?
     will have to exclude some of them
-        
+    
+    got summarize_showers2.R to work. large skip{} block of charts
+    excluded showers w/ vol.total < 2.5 and dur.total < 2.5
+    assumed showering starts at beginning of 30 sec constant flow after
+    max flow rate in first 5 minutes
+    
+    
+    
     

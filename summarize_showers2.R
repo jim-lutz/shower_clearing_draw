@@ -369,22 +369,3 @@ for(i in DT_summary[,shower.id]) { # actual loop
 # save DT_summary
 save(DT_summary, file = paste0(wd_data,"DT_summary.RData"))
 
-
-DT_summary[is.na(RMSE), 
-           list(nshowers = length(shower.id)), 
-           by=.(study,KEYCODE,logging,meter)] [order(KEYCODE)]
-# problems w/ KEYCODE 13219
-#       study KEYCODE logging       meter nshowers
-# 1:  Seattle   13219       2 total water        4
-# 2:  Seattle   13219       2   hot water        9
-# 3:  Seattle   13219       3   hot water        4
-# 4:  Seattle   13236       1   hot water        1
-# 5:  Seattle   13266       3 total water        2
-# 6:  Seattle   13431       1   hot water        1
-# 7:    EBMUD   22009       3 total water        1
-# 8:    EBMUD   22021       2   hot water        1
-# 9:    EBMUD   22021       2 total water        1
-# 10:   EBMUD   22037       3   hot water        1
-# 11:   EBMUD   22070       1 total water        1
-# 12:   EBMUD   22070       3 total water        1
-# 13:   EBMUD   22075       1   hot water        1
