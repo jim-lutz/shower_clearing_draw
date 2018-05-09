@@ -1080,11 +1080,21 @@ find_showering2 <- function(DT=DT_1shower) {
   
   # warn if not at least one minute of constant flow
   if(max(DT.copy[]$nintervals) < 3 ){
-    # warning("less than 30 seconds of constant flow in shower.id: ", 
-    #           DT.copy[,unique(shower.id)])
+    warning("less than 30 seconds of constant flow in shower.id: ", 
+               DT.copy[,unique(shower.id)])
     
     # the calculation isn't going to work
     return(NA)
+  }
+  
+  # warn if 30 seconds constant flow doesn't happen after peak
+  if(nrow(DT.copy[nintervals == 3 & max.Rate.time<date.time])==0){
+    warning("max flow rate after 30 seconds of constant flow in shower.id: ", 
+            DT.copy[,unique(shower.id)])
+    
+    # the calculation isn't going to work
+    return(NA)
+    
   }
   
   # find the time of first nintervals == 3 

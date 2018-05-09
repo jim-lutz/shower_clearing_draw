@@ -48,6 +48,10 @@ DT_summary[ DT_totals, `:=` (vol.total = i.vol.total,
                              dur.total = i.dur.total),
             on= "shower.id"]
 
+# skip looking at plots
+skip=TRUE
+if(skip==TRUE) {
+
 # look at distribution of vol.total
 p.vol.total <- ggplot(data = DT_summary[] )
 p.vol.total <- p.vol.total + geom_histogram( aes( x = vol.total ),
@@ -141,18 +145,6 @@ DT_shower_Flows[shower.id==1485, list(StartTime,Rate,meter)]
 plot_shower_id(1485)
 plot_water_id(1485)
 # yes
-
-i=1485
-# check Rate on plot_water_id()? it looks too high
-# plot_water_id() Rate looks OK out of 
-# tw_file = /home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/Aquacraft/EBMUD/Pre Retrofit/22027.tdb
-
-DT_shower_Flows[shower.id==1485, list(StartTime,Rate)]
-DT_tw_flows[ymd_hms("2001-02-20 13:26:35",tz=tz)<= date.time &
-            date.time <= ymd_hms("2001-02-20 13:30:45",tz=tz),
-            list(date.time,Rate)]
-DT_shower_Flows[shower.id==1485]
-# something else is flowing then?
 
 DT_shower_Flows[shower.id==1319, list(StartTime,Rate,meter)]
 plot_shower_id(1319)
@@ -260,6 +252,9 @@ ggsave(filename = paste0(wd_charts,"/trim.durvol.total.png"),
        plot = p.trmdv.total,
        width = 10.5, height = 9.8)
 
+} # end of skip plots
+
+
 # exclude too short & too small
 DT_summary <- DT_summary[dur.total > 2.5 & vol.total > 2.5]
 # from 2507 to 2256
@@ -335,9 +330,9 @@ for(i in DT_summary[,shower.id]) { # actual loop
   # find the start of showering time
   .start.showering.time <- find_showering2(DT_1shower)
 
-  # DT_shower_Flows[shower.id==6, list(StartTime,Rate,meter)]
-  # plot_shower_id(6)
-  # plot_water_id(6)
+  # DT_shower_Flows[shower.id==17, list(StartTime,Rate,meter)]
+  # plot_shower_id(17)
+  # plot_water_id(17)
   # 
   
   
