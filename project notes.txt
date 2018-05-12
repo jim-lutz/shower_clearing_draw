@@ -452,5 +452,98 @@ next steps?
     
     maybe histograms of distributions?
     
+    email to John & Gary with initial results and explanations
     
+2018-05-11
+    from EBMUD report, Mayer, Peter W., William B. DeOreo, Erin Towler, and David M. Lewis. “Residential Indoor Water Conservation Study: Evaluation of High Efficiency Indoor Plumbing Fixture Retrofits in Single-Family Homes in the East Bay Municipal Utility District Service Area.” Aquacraft, Inc. Water Engineering and Management, July 2003.
+
+        "There were two post retrofit logging sessions. Each involved the same procedures for
+installation and calibration of the data loggers." p 17
+    
+    Tables of interest in /home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/Aquacraft/EBMUD/EBMUD Retrofit Database.mdb
+    
+    'AUDIT DATA - 2001'
+    
+    See survey form on p 129
+        Possibly useful questions
+            1 Total number of full-time residents
+                Children (0-12 yrs)
+                Teens (13-19 yrs)
+                Adults (20+)
+            4 Year was the house built?
+            5 Floor area of the house
+            6 Number of stories
+            7 Garage size
+            8 Number of bedrooms
+            9   Full baths
+                3/4 baths
+                1/2 baths
+            HOT Water Pressure (psi)
+            BATHROOM INFORMATON: 1, 2, 3, 4, 5
+                48 BATH?
+                49 Size of tub
+                51 SHOWER?
+                52 Type of showerhead
+                54 Does Bath leak during Shower?
+                
+    database table has some fields not in survey that appear to be for field measurements
+        39A) HOT WATER PRESSURE - STATIC
+        39B) HOT WATER PRESSURE - TAP OPEN
+        A) BATH FLOW RATE
+        A) SHOWER FLOW RATE
+        B) BATH FLOW RATE
+        B) SHOWER FLOW RATE
+        C) BATH FLOW RATE
+        C) SHOWER FLOW RATE
+        67) HAND HELD SHOWER
+        
+    'LOG 1 DATES/RESIDENTS'
+    'LOG 3 DATES/RESIDENTS'
+        KEYCODE, DATE, RESIDENTS (int), DAY (day of week)
+    'Log 2 People'
+        wide format, KEYCODE then many columns of dates
+            
+/home/jiml/HotWaterResearch/projects/hwds/shower_clearing_draw/data/Aquacraft/Seattle/Seattle end use data.mdb
+
+    has similar tables
+        'SEATTLE AUDIT DATA - 1999'
+        'LOG 1 DATES/RESIDENTS'
+        'LOG 2 DATES/RESIDENTS'
+        'LOG 3 DATES/RESIDENTS' 
+
+    also 'RESIDENT DAYS LOG 1'
+        which seems similar to 'Log 2 People' in EBMUD
+        
+Mayer, Peter W., William B. DeOreo, and David M. Lewis. “Seattle Home Water Conservation Study: The Impacts of High Efficiency Plumbing Fixture Retrofits in Single-Family Homes.” Aquacraft, Inc. Water Engineering and Management, December 2000.
+
+Both studies included only single-family owner-occupied homes with relatively high water use and clothes washer ownership.
+
+The flow rate in the audit table is described as:
+
+"An attempt was made to measure the maximum possible flow rate from each faucet, shower, and bath in the audited study homes. These flow rates were noted on the audit form and entered into the Access audit database."
+    Seattle p 16
+    
+Also two post retrofit logging sessions in Seattle.    
+        
+to compare distributions
+https://stats.stackexchange.com/questions/4/assessing-the-significance-of-differences-in-distributions#135
+
+https://www.itl.nist.gov/div898/software/dataplot/refman1/auxillar/ks2samp.htm
+
+http://www.csss.washington.edu/Papers/wp27.pdf
+
+https://stats.stackexchange.com/questions/28431/what-are-good-data-visualization-techniques-to-compare-distributions/28442
+
+https://flowingdata.com/2012/05/15/how-to-visualize-and-compare-distributions/
+
+for this presentation, normalized density curves are probably appropriate
+
+http://www.gamlss.com/
+
+
+    next steps combing logging 2 & 3
+    plots using TW only
+    distribution plots of (normalized?) density curves 
+    import audit tables
+    import people by day tables
     

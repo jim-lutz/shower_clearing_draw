@@ -1,5 +1,5 @@
 # examine_showering.R
-# script to examine information in DT_summary.RData
+# script to generate initial plots from DT_summary.RData
 # Jim Lutz "Wed May  9 07:41:58 2018"
 
 # set packages & etc
