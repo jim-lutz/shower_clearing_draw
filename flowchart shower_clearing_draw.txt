@@ -115,6 +115,15 @@ summarize_showers2.R
             ./data/DT_summary.RData 
     output: ./data/DT_summary.RData (new)
     
+examine_showering.R
+    # script to generate initial plots from DT_summary.RData
+    input:  ./data/DT_summary.RData
+    output: ./charts/*.png
+
+plot_showering.R
+    # script to generate presentation plots from DT_summary.RData
+    input:  ./data/DT_summary.RData
+    output: ./charts/*.png
 
        
 
